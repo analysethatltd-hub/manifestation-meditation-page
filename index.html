@@ -335,6 +335,74 @@
       animation: gardenResetPulse 820ms ease-out;
     }
 
+    .garden-reset .reset-x {
+      stroke: rgba(255, 96, 96, 0.98);
+      stroke-width: 2.6;
+    }
+
+    .reset-confirm {
+      position: fixed;
+      top: 4.35rem;
+      left: 1rem;
+      z-index: 32;
+      width: min(18rem, calc(100vw - 2rem));
+      padding: 0.85rem;
+      border: 1px solid rgba(255, 247, 221, 0.18);
+      border-radius: 8px;
+      color: rgba(255, 247, 221, 0.9);
+      background: rgba(12, 10, 9, 0.76);
+      box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.3), inset 0 0 1.2rem rgba(255, 247, 221, 0.04);
+      backdrop-filter: blur(16px);
+    }
+
+    .reset-confirm[hidden] {
+      display: none;
+    }
+
+    .reset-title {
+      margin: 0 0 0.3rem;
+      color: rgba(184, 255, 212, 0.96);
+      font: 700 0.96rem/1.15 "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .reset-copy {
+      margin: 0;
+      color: rgba(255, 247, 221, 0.68);
+      font: 0.78rem/1.35 "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .reset-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+    }
+
+    .reset-choice {
+      min-height: 2.2rem;
+      border: 1px solid rgba(255, 247, 221, 0.14);
+      border-radius: 999px;
+      color: rgba(255, 247, 221, 0.86);
+      background: rgba(255, 247, 221, 0.08);
+      font: 700 0.74rem/1 "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .reset-choice.clear {
+      border-color: rgba(255, 96, 96, 0.36);
+      color: rgba(255, 178, 178, 0.96);
+      background: rgba(255, 96, 96, 0.13);
+    }
+
+    .reset-choice:focus-visible {
+      outline: 2px solid rgba(184, 255, 212, 0.46);
+      outline-offset: 2px;
+    }
+
     .speaker-icon {
       position: relative;
       inline-size: 1rem;
@@ -925,6 +993,12 @@
         left: 0.75rem;
       }
 
+      .reset-confirm {
+        top: 3.95rem;
+        left: 0.75rem;
+        width: min(18rem, calc(100vw - 1.5rem));
+      }
+
       .sound-invite {
         top: 0.75rem;
         min-height: 2.7rem;
@@ -1107,17 +1181,26 @@
         <path d="M9 6c-.7-.8-.7-1.7 0-2.6"></path>
         <path d="M12 6c-.7-.8-.7-1.7 0-2.6"></path>
       </symbol>
-      <symbol id="icon-reset" viewBox="0 0 24 24">
-        <path d="M6 9a7 7 0 1 1 1.4 8.8"></path>
-        <path d="M6 9H3.5V6.5"></path>
-        <path d="M8 15c1.1-1.6 2.4-2.4 4-2.4s2.9.8 4 2.4"></path>
-        <path d="M12 12.6V8.5"></path>
-      </symbol>
     </svg>
 
     <button class="garden-reset" id="gardenReset" type="button" aria-label="Reset garden" title="Reset garden">
-      <svg class="symbol-icon" aria-hidden="true"><use href="#icon-reset"></use></svg>
+      <svg class="symbol-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 21v-7"></path>
+        <path d="M12 15c-4.3-.3-6.5-2.4-6.8-6 4 .1 6.1 2.2 6.8 6Z"></path>
+        <path d="M12 15c4.3-.3 6.5-2.4 6.8-6-4 .1-6.1 2.2-6.8 6Z"></path>
+        <path d="M12 14c-1.8-3.4-1.8-6.2 0-8.7 1.8 2.5 1.8 5.3 0 8.7Z"></path>
+        <path class="reset-x" d="M16.5 5.5l5 5"></path>
+        <path class="reset-x" d="M21.5 5.5l-5 5"></path>
+      </svg>
     </button>
+    <div class="reset-confirm" id="gardenResetConfirm" role="dialog" aria-modal="true" aria-labelledby="gardenResetTitle" hidden>
+      <p class="reset-title" id="gardenResetTitle">Clear garden?</p>
+      <p class="reset-copy">This removes the flowers and trees. The bee will begin planting again.</p>
+      <div class="reset-actions">
+        <button class="reset-choice" id="gardenResetCancel" type="button">Keep</button>
+        <button class="reset-choice clear" id="gardenResetClear" type="button">Clear</button>
+      </div>
+    </div>
     <button class="audio-toggle" id="audioToggle" type="button" data-audio="off" aria-label="Turn sound on" title="Turn sound on">
       <svg class="symbol-icon" aria-hidden="true"><use href="#icon-sound"></use></svg>
     </button>
@@ -1261,6 +1344,9 @@
         count: document.getElementById("phaseCount"),
         audioToggle: document.getElementById("audioToggle"),
         gardenReset: document.getElementById("gardenReset"),
+        gardenResetConfirm: document.getElementById("gardenResetConfirm"),
+        gardenResetCancel: document.getElementById("gardenResetCancel"),
+        gardenResetClear: document.getElementById("gardenResetClear"),
         soundInvite: document.getElementById("soundInvite"),
         audioDebug: document.getElementById("audioDebug"),
         mobileAudio: document.getElementById("mobileAudioFallback"),
@@ -1358,6 +1444,7 @@
       const GARDEN_KEY = "manifestationGarden.v1";
       const GARDEN_LIMIT = 420;
       const PLANT_INTERVAL_MS = 72000;
+      const STARTER_PLANT_DELAY_MS = 9000;
       const mobileControls = window.matchMedia("(max-width: 760px)");
       const query = new URLSearchParams(window.location.search);
       const forceMediaAudio = query.has("force-media-audio");
@@ -1764,7 +1851,19 @@
         });
 
         els.breathReset.addEventListener("click", resetBreathDurations);
-        els.gardenReset.addEventListener("click", resetGarden);
+        els.gardenReset.addEventListener("click", openGardenResetConfirm);
+        els.gardenResetCancel.addEventListener("click", closeGardenResetConfirm);
+        els.gardenResetClear.addEventListener("click", confirmResetGarden);
+        els.gardenResetConfirm.addEventListener("click", (event) => {
+          if (event.target === els.gardenResetConfirm) {
+            closeGardenResetConfirm();
+          }
+        });
+        window.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && !els.gardenResetConfirm.hidden) {
+            closeGardenResetConfirm();
+          }
+        });
 
         els.gratitudeNext.addEventListener("click", () => {
           setGratitude(state.gratitudeIndex + 1);
@@ -2036,10 +2135,26 @@
         placeBee();
         state.garden.bee.pollen = 0.3;
         state.garden.bee.agitatedUntil = 0;
+        state.garden.bee.nextPlantAt = now + STARTER_PLANT_DELAY_MS;
         els.gardenReset.dataset.resetting = "true";
         window.setTimeout(() => {
           delete els.gardenReset.dataset.resetting;
         }, 860);
+      }
+
+      function openGardenResetConfirm() {
+        els.gardenResetConfirm.hidden = false;
+        window.setTimeout(() => els.gardenResetCancel.focus(), 0);
+      }
+
+      function closeGardenResetConfirm() {
+        els.gardenResetConfirm.hidden = true;
+        els.gardenReset.focus();
+      }
+
+      function confirmResetGarden() {
+        els.gardenResetConfirm.hidden = true;
+        resetGarden();
       }
 
       function plantGratitude() {
@@ -2177,6 +2292,11 @@
         garden.lastTick = now;
 
         if (!reducedMotion) {
+          if (garden.plants.length === 0 && now >= bee.nextPlantAt) {
+            pollinateNearBee(now);
+            setBeeTarget();
+          }
+
           const dx = bee.targetX - bee.x;
           const dy = bee.targetY - bee.y;
           const distance = Math.hypot(dx, dy);
@@ -3108,7 +3228,7 @@
 
       function bindBeeInteraction() {
         let lastMouseStartle = 0;
-        const canStartle = (event) => !event.target.closest(".chakra-panel, .audio-toggle, .garden-reset, .sound-invite");
+        const canStartle = (event) => !event.target.closest(".chakra-panel, .audio-toggle, .garden-reset, .reset-confirm, .sound-invite");
 
         window.addEventListener("pointerdown", (event) => {
           if (canStartle(event)) {
