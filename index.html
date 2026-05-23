@@ -399,6 +399,30 @@
       opacity: 0.86;
     }
 
+    .audio-debug {
+      position: fixed;
+      left: 0.75rem;
+      top: 0.75rem;
+      z-index: 30;
+      display: none;
+      max-width: min(19rem, calc(100vw - 4.5rem));
+      padding: 0.55rem 0.65rem;
+      border: 1px solid rgba(184, 255, 212, 0.22);
+      border-radius: 8px;
+      color: rgba(226, 255, 238, 0.92);
+      background: rgba(5, 8, 7, 0.66);
+      box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(12px);
+      font: 0.68rem/1.45 "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+      white-space: pre-line;
+      pointer-events: none;
+    }
+
+    html[data-audio-debug="true"] .audio-debug {
+      display: block;
+    }
+
     .chakra-panel {
       position: fixed;
       left: 1rem;
@@ -868,6 +892,7 @@
       <svg class="symbol-icon" aria-hidden="true"><use href="#icon-sound"></use></svg>
     </button>
     <audio id="mobileAudioFallback" preload="auto" loop playsinline aria-hidden="true"></audio>
+    <output class="audio-debug" id="audioDebug" aria-live="polite"></output>
 
     <section class="mantra" id="mantra" aria-live="polite">
       <h1 id="mantraLine">I am aligned.</h1>
@@ -999,6 +1024,7 @@
         phase: document.getElementById("phaseText"),
         count: document.getElementById("phaseCount"),
         audioToggle: document.getElementById("audioToggle"),
+        audioDebug: document.getElementById("audioDebug"),
         mobileAudio: document.getElementById("mobileAudioFallback"),
         gratitudePanel: document.getElementById("gratitudePanel"),
         gratitudeBody: document.getElementById("gratitudeBody"),
@@ -1095,7 +1121,9 @@
       const GARDEN_LIMIT = 420;
       const PLANT_INTERVAL_MS = 72000;
       const mobileControls = window.matchMedia("(max-width: 760px)");
-      const forceMediaAudio = new URLSearchParams(window.location.search).has("force-media-audio");
+      const query = new URLSearchParams(window.location.search);
+      const forceMediaAudio = query.has("force-media-audio");
+      const audioDebugEnabled = query.has("audio-debug");
       const mobileUserAgent = /Android|iPhone|iPad|iPod|Mobile|CriOS|FxiOS/i.test(navigator.userAgent);
       const touchConstrainedAudio = window.matchMedia("(pointer: coarse)").matches || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
       const hasWebAudio = Boolean(window.AudioContext || window.webkitAudioContext);
@@ -1120,10 +1148,13 @@
         volume: 0.52,
         audio: null,
         audioEnabled: false,
+        audioSettled: false,
+        mediaFallbackAudible: false,
         mediaAudio: null,
         mediaAudioUrl: "",
         mediaFrequency: 0,
         isMobileAudio: mobileUserAgent || touchConstrainedAudio,
+        lastAudioGesture: "none",
         gratitudeIndex: 0,
         panelCollapsed: mobileControls.matches,
         panelUserSet: false,
@@ -1318,17 +1349,40 @@
         state.audio.lowpass.frequency.setTargetAtTime(Math.max(840, Math.min(2600, state.frequency * 2.8)), now, 0.7);
       }
 
-      function shouldUseMediaAudio() {
+      function shouldUseMediaOnly() {
         return forceMediaAudio || !hasWebAudio;
       }
 
+      function shouldPrimeMediaAudio() {
+        return shouldUseMediaOnly() || state.isMobileAudio;
+      }
+
+      function currentAudioMode() {
+        if (shouldUseMediaOnly()) {
+          return "media";
+        }
+        if (state.isMobileAudio && state.mediaAudio && !state.mediaAudio.paused) {
+          return "hybrid";
+        }
+        return "web-audio";
+      }
+
       function mediaTargetVolume() {
-        return state.audioEnabled && shouldUseMediaAudio() ? Math.min(0.9, Math.max(0, state.volume)) : 0;
+        if (!state.audioEnabled || !shouldPrimeMediaAudio()) {
+          return 0;
+        }
+        if (shouldUseMediaOnly() || state.mediaFallbackAudible) {
+          return Math.min(0.9, Math.max(0, state.volume));
+        }
+        return state.isMobileAudio ? Math.min(0.38, Math.max(0, state.volume * 0.42)) : 0;
       }
 
       function webAudioTargetVolume() {
-        const mobileScale = shouldUseMediaAudio() ? 0.24 : 1;
-        return state.audioEnabled ? state.volume * mobileScale : 0;
+        if (!state.audioEnabled || shouldUseMediaOnly()) {
+          return 0;
+        }
+        const mobileScale = state.isMobileAudio ? 0.72 : 1;
+        return state.volume * mobileScale;
       }
 
       function setFrequency(value) {
@@ -2128,9 +2182,10 @@
 
       function nudgeAudio() {
         if (state.audioEnabled) {
-          if (shouldUseMediaAudio()) {
+          if (shouldPrimeMediaAudio()) {
             startMediaAudio();
-          } else {
+          }
+          if (!shouldUseMediaOnly()) {
             startAudio();
           }
         }
@@ -2141,14 +2196,20 @@
         syncAudioToggle();
 
         if (state.audioEnabled) {
-          if (shouldUseMediaAudio()) {
+          state.audioSettled = false;
+          state.mediaFallbackAudible = shouldUseMediaOnly();
+          if (shouldPrimeMediaAudio()) {
             startMediaAudio();
-          } else {
+          }
+          if (!shouldUseMediaOnly()) {
             startAudio();
           }
+          window.setTimeout(settleAudioRoute, 1400);
           return;
         }
 
+        state.audioSettled = false;
+        state.mediaFallbackAudible = false;
         document.documentElement.dataset.audio = "off";
         stopMediaAudio();
         if (state.audio) {
@@ -2168,6 +2229,7 @@
             return;
           }
           suppressClickUntil = now + 850;
+          state.lastAudioGesture = event.type;
           setAudioEnabled(!state.audioEnabled);
         };
 
@@ -2206,7 +2268,7 @@
 
       function createMediaDroneUrl(frequency) {
         const sampleRate = 44100;
-        const duration = 25;
+        const duration = 12.5;
         const samples = sampleRate * duration;
         const buffer = new ArrayBuffer(44 + samples * 2);
         const view = new DataView(buffer);
@@ -2285,7 +2347,7 @@
       }
 
       function syncMediaAudio() {
-        if (!state.audioEnabled || !shouldUseMediaAudio()) {
+        if (!state.audioEnabled || !shouldPrimeMediaAudio()) {
           return;
         }
 
@@ -2300,12 +2362,12 @@
       }
 
       function startMediaAudio() {
-        if (!shouldUseMediaAudio()) {
+        if (!shouldPrimeMediaAudio()) {
           document.documentElement.dataset.audioMedia = "unused";
           return;
         }
 
-        document.documentElement.dataset.audioMode = "media";
+        document.documentElement.dataset.audioMode = currentAudioMode();
         const media = ensureMediaAudio();
         syncMediaAudio();
         syncMediaVolume();
@@ -2324,12 +2386,69 @@
         }
       }
 
+      function prepareMediaFallback() {
+        if (!shouldPrimeMediaAudio()) {
+          document.documentElement.dataset.audioMedia = "unused";
+          return;
+        }
+        ensureMediaAudio();
+        syncMediaPitch();
+        syncMediaVolume();
+        if (!document.documentElement.dataset.audioMedia) {
+          document.documentElement.dataset.audioMedia = "ready";
+        }
+      }
+
       function stopMediaAudio() {
         if (state.mediaAudio) {
           state.mediaAudio.pause();
           state.mediaAudio.currentTime = 0;
         }
         document.documentElement.dataset.audioMedia = "off";
+      }
+
+      function measureWebAudioLevel() {
+        if (!state.audio || !state.audio.analyser || !state.audio.sampleData) {
+          return 0;
+        }
+        state.audio.analyser.getByteTimeDomainData(state.audio.sampleData);
+        let total = 0;
+        for (let index = 0; index < state.audio.sampleData.length; index += 1) {
+          const centered = (state.audio.sampleData[index] - 128) / 128;
+          total += centered * centered;
+        }
+        return Math.sqrt(total / state.audio.sampleData.length);
+      }
+
+      function updateAudioDebug() {
+        if (!audioDebugEnabled || !els.audioDebug) {
+          return;
+        }
+        const media = state.mediaAudio || els.mobileAudio;
+        const level = measureWebAudioLevel();
+        els.audioDebug.textContent = [
+          `sound ${state.audioEnabled ? "on" : "off"} | ${document.documentElement.dataset.audioMode || "idle"}`,
+          `ctx ${document.documentElement.dataset.audioContext || "none"} | web ${document.documentElement.dataset.audio || "idle"}`,
+          `media ${document.documentElement.dataset.audioMedia || "idle"} | ready ${media ? media.readyState : "n/a"} | t ${media ? media.currentTime.toFixed(1) : "0.0"}`,
+          `level ${level.toFixed(3)} | gesture ${state.lastAudioGesture}`,
+          `ua ${state.isMobileAudio ? "mobile/touch" : "desktop"}`
+        ].join("\n");
+      }
+
+      function settleAudioRoute() {
+        if (!state.audioEnabled) {
+          return;
+        }
+        const webRunning = state.audio && state.audio.context.state === "running";
+        state.audioSettled = true;
+        state.mediaFallbackAudible = shouldUseMediaOnly() || !webRunning;
+        if (!webRunning && shouldPrimeMediaAudio()) {
+          document.documentElement.dataset.audio = state.audio ? "fallback" : "media-only";
+          startMediaAudio();
+        }
+        document.documentElement.dataset.audioMode = currentAudioMode();
+        syncMediaVolume();
+        updateAudioDebug();
       }
 
       function connectPanned(audio, input, output, panValue) {
@@ -2352,19 +2471,39 @@
         if (!AudioContext) {
           document.documentElement.dataset.audio = "unsupported";
           document.documentElement.dataset.audioMode = "media";
+          state.mediaFallbackAudible = true;
           startMediaAudio();
           return;
         }
 
         document.documentElement.dataset.audio = "starting";
-        document.documentElement.dataset.audioMode = "web-audio";
-        const audio = new AudioContext();
+        document.documentElement.dataset.audioMode = state.isMobileAudio ? "hybrid" : "web-audio";
+        let audio;
+        try {
+          audio = new AudioContext();
+        } catch (error) {
+          document.documentElement.dataset.audio = "unsupported";
+          document.documentElement.dataset.audioError = error && error.name ? error.name : "audio-context";
+          state.mediaFallbackAudible = true;
+          startMediaAudio();
+          return;
+        }
         audio.onstatechange = () => {
           document.documentElement.dataset.audioContext = audio.state;
+          updateAudioDebug();
         };
+        playUnlockPulse(audio);
+        const firstResume = audio.resume();
+        if (firstResume && typeof firstResume.catch === "function") {
+          firstResume.catch((error) => {
+            document.documentElement.dataset.audio = "blocked";
+            document.documentElement.dataset.audioError = error && error.name ? error.name : "resume-failed";
+          });
+        }
         const master = audio.createGain();
         const lowpass = audio.createBiquadFilter();
         const noiseFilter = audio.createBiquadFilter();
+        const analyser = audio.createAnalyser();
 
         lowpass.type = "lowpass";
         lowpass.frequency.value = Math.max(840, Math.min(2600, state.frequency * 2.8));
@@ -2374,8 +2513,10 @@
         noiseFilter.Q.value = 7.2;
 
         master.gain.value = 0;
+        analyser.fftSize = 1024;
         master.connect(lowpass);
-        lowpass.connect(audio.destination);
+        lowpass.connect(analyser);
+        analyser.connect(audio.destination);
         noiseFilter.connect(master);
 
         const voices = [
@@ -2428,12 +2569,13 @@
           lowpass,
           master,
           noiseFilter,
-          voices
+          voices,
+          analyser,
+          sampleData: new Uint8Array(analyser.fftSize)
         };
 
         document.documentElement.dataset.audio = state.audioEnabled ? audio.state : "off";
         document.documentElement.dataset.audioContext = audio.state;
-        playUnlockPulse(audio);
         awakenAudio();
         document.addEventListener("visibilitychange", () => {
           const now = state.audio.context.currentTime;
@@ -2457,20 +2599,25 @@
           state.audio.master.gain.setValueAtTime(state.audio.master.gain.value, now);
           state.audio.master.gain.linearRampToValueAtTime(webAudioTargetVolume(), now + (state.audioEnabled ? 0.9 : 0.22));
           document.documentElement.dataset.audio = state.audioEnabled ? "on" : "off";
-          document.documentElement.dataset.audioMode = "web-audio";
+          document.documentElement.dataset.audioMode = currentAudioMode();
           document.documentElement.dataset.audioContext = state.audio.context.state;
+          updateAudioDebug();
         }).catch(() => {
           document.documentElement.dataset.audio = "blocked";
           document.documentElement.dataset.audioContext = state.audio.context.state;
+          state.mediaFallbackAudible = true;
+          syncMediaVolume();
+          updateAudioDebug();
         });
       }
 
       function bindAudioUnlock() {
         const unlock = () => {
           if (state.audioEnabled) {
-            if (shouldUseMediaAudio()) {
+            if (shouldPrimeMediaAudio()) {
               startMediaAudio();
-            } else {
+            }
+            if (!shouldUseMediaOnly()) {
               startAudio();
             }
           }
@@ -2508,6 +2655,10 @@
       window.addEventListener("beforeunload", saveGarden);
 
       loadGarden();
+      if (audioDebugEnabled) {
+        document.documentElement.dataset.audioDebug = "true";
+        window.setInterval(updateAudioDebug, 700);
+      }
       buildChakraButtons();
       bindControls();
       bindPanelControls();
@@ -2525,6 +2676,10 @@
       syncBreathControls();
       setGratitude(0);
       resize();
+      if (shouldPrimeMediaAudio()) {
+        const idle = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 250));
+        idle(prepareMediaFallback);
+      }
       seedGarden();
       setMantra(0);
       animate(performance.now());
