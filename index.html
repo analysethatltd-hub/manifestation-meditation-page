@@ -1387,6 +1387,7 @@
         volume: 0.52,
         audio: null,
         audioEnabled: false,
+        audioConfirmed: false,
         audioSettled: false,
         mediaFallbackAudible: false,
         mediaAudio: null,
@@ -2564,7 +2565,13 @@
         els.audioToggle.dataset.audio = state.audioEnabled ? "on" : "off";
         els.audioToggle.setAttribute("aria-label", state.audioEnabled ? "Turn sound off" : "Turn sound on");
         els.audioToggle.title = state.audioEnabled ? "Turn sound off" : "Turn sound on";
-        document.documentElement.dataset.audioActive = String(state.audioEnabled);
+        document.documentElement.dataset.audioActive = String(state.audioEnabled && state.audioConfirmed);
+        if (els.soundInvite) {
+          const label = els.soundInvite.querySelector("span");
+          if (label) {
+            label.textContent = state.audioEnabled && !state.audioConfirmed ? "Tap again for sound" : "Tap for sound";
+          }
+        }
       }
 
       function nudgeAudio() {
@@ -2584,6 +2591,7 @@
 
         if (state.audioEnabled) {
           state.audioSettled = false;
+          state.audioConfirmed = false;
           state.mediaFallbackAudible = shouldUseMediaOnly();
           if (shouldPrimeMediaAudio()) {
             startMediaAudio();
@@ -2596,8 +2604,10 @@
         }
 
         state.audioSettled = false;
+        state.audioConfirmed = false;
         state.mediaFallbackAudible = false;
         document.documentElement.dataset.audio = "off";
+        syncAudioToggle();
         stopMediaAudio();
         if (state.audio) {
           const now = state.audio.context.currentTime;
@@ -2607,15 +2617,8 @@
       }
 
       function bindAudioToggle() {
-        let suppressClickUntil = 0;
         const toggle = (event) => {
-          event.preventDefault();
           event.stopPropagation();
-          const now = performance.now();
-          if (now < suppressClickUntil) {
-            return;
-          }
-          suppressClickUntil = now + 850;
           state.lastAudioGesture = event.type;
           setAudioEnabled(!state.audioEnabled);
         };
@@ -2624,15 +2627,10 @@
           if (!element) {
             return;
           }
-          if (window.PointerEvent) {
-            element.addEventListener("pointerdown", toggle);
-          } else {
-            element.addEventListener("touchstart", toggle);
-            element.addEventListener("touchend", toggle);
-          }
           element.addEventListener("click", toggle);
           element.addEventListener("keydown", (event) => {
             if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
               toggle(event);
             }
           });
@@ -2777,13 +2775,19 @@
         const playRequest = media.play();
         if (playRequest && typeof playRequest.then === "function") {
           playRequest.then(() => {
+            state.audioConfirmed = true;
             document.documentElement.dataset.audioMedia = "on";
+            syncAudioToggle();
           }).catch((error) => {
+            state.audioConfirmed = false;
             document.documentElement.dataset.audioMedia = "blocked";
             document.documentElement.dataset.audioError = error && error.name ? error.name : "media-play-failed";
+            syncAudioToggle();
           });
         } else {
+          state.audioConfirmed = true;
           document.documentElement.dataset.audioMedia = "on";
+          syncAudioToggle();
         }
       }
 
@@ -2805,7 +2809,9 @@
           state.mediaAudio.pause();
           state.mediaAudio.currentTime = 0;
         }
+        state.audioConfirmed = state.audioEnabled && state.audio && state.audio.context.state === "running";
         document.documentElement.dataset.audioMedia = "off";
+        syncAudioToggle();
       }
 
       function measureWebAudioLevel() {
@@ -2908,6 +2914,12 @@
         return pan;
       }
 
+      function markWebAudioConfirmed() {
+        state.audioConfirmed = Boolean(state.audioEnabled && state.audio && state.audio.context.state === "running");
+        document.documentElement.dataset.audioActive = String(state.audioConfirmed);
+        syncAudioToggle();
+      }
+
       function startAudio() {
         if (state.audio) {
           awakenAudio();
@@ -2937,6 +2949,7 @@
         }
         audio.onstatechange = () => {
           document.documentElement.dataset.audioContext = audio.state;
+          markWebAudioConfirmed();
           updateAudioDebug();
         };
         playUnlockPulse(audio);
@@ -3062,12 +3075,15 @@
           document.documentElement.dataset.audio = state.audioEnabled ? "on" : "off";
           document.documentElement.dataset.audioMode = currentAudioMode();
           document.documentElement.dataset.audioContext = state.audio.context.state;
+          markWebAudioConfirmed();
           updateAudioDebug();
         }).catch(() => {
           document.documentElement.dataset.audio = "blocked";
           document.documentElement.dataset.audioContext = state.audio.context.state;
+          state.audioConfirmed = false;
           state.mediaFallbackAudible = true;
           syncMediaVolume();
+          syncAudioToggle();
           updateAudioDebug();
         });
       }
