@@ -359,6 +359,44 @@
       transform-origin: center;
     }
 
+    .icon-sprite {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .symbol-icon {
+      inline-size: 1.02rem;
+      block-size: 1.02rem;
+      flex: 0 0 auto;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .audio-toggle .symbol-icon {
+      inline-size: 1.18rem;
+      block-size: 1.18rem;
+    }
+
+    .audio-toggle[data-audio="off"] .symbol-icon {
+      opacity: 0.62;
+    }
+
+    .audio-toggle[data-audio="off"]::after {
+      content: "";
+      position: absolute;
+      inline-size: 1.24rem;
+      block-size: 2px;
+      border-radius: 999px;
+      background: currentColor;
+      transform: rotate(-42deg);
+      opacity: 0.86;
+    }
+
     .chakra-panel {
       position: fixed;
       left: 1rem;
@@ -426,7 +464,9 @@
     }
 
     .chakra-name {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 0.42rem;
       margin-top: 0.1rem;
       color: hsl(var(--panel-hue, var(--chakra-hue)), 88%, 74%);
       font-size: 1rem;
@@ -492,6 +532,10 @@
 
     .soft-command,
     .support-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.38rem;
       min-height: 2.15rem;
       border: 1px solid rgba(255, 247, 221, 0.14);
       border-radius: 8px;
@@ -503,10 +547,14 @@
     }
 
     .support-link {
-      display: flex;
-      align-items: center;
       justify-content: space-between;
       padding: 0 0.64rem;
+    }
+
+    .support-link > span {
+      display: flex;
+      align-items: center;
+      gap: 0.38rem;
     }
 
     .soft-command:hover,
@@ -759,12 +807,67 @@
     <div class="axis-light" aria-hidden="true"></div>
     <div class="soft-rays" aria-hidden="true"></div>
 
+    <svg class="icon-sprite" aria-hidden="true">
+      <symbol id="icon-heart" viewBox="0 0 24 24">
+        <path d="M12 20s-7-4.4-8.7-9.2C2 7.1 4.4 4.5 7.2 4.5c1.7 0 3.1 1 4.8 2.9 1.7-1.9 3.1-2.9 4.8-2.9 2.8 0 5.2 2.6 3.9 6.3C19 15.6 12 20 12 20Z"></path>
+      </symbol>
+      <symbol id="icon-seed" viewBox="0 0 24 24">
+        <path d="M12 21V11"></path>
+        <path d="M12 12c-4.2-.4-6.4-2.5-6.7-6.2 4.1.2 6.1 2.4 6.7 6.2Z"></path>
+        <path d="M12 14c4.2-.3 6.4-2.4 6.8-6.1-4.1.1-6.2 2.3-6.8 6.1Z"></path>
+      </symbol>
+      <symbol id="icon-breath" viewBox="0 0 24 24">
+        <path d="M3 8c3 0 3-2 6-2s3 2 6 2 3-2 6-2"></path>
+        <path d="M3 13c3 0 3-2 6-2s3 2 6 2 3-2 6-2"></path>
+        <path d="M3 18c3 0 3-2 6-2s3 2 6 2 3-2 6-2"></path>
+      </symbol>
+      <symbol id="icon-sliders" viewBox="0 0 24 24">
+        <path d="M4 7h7"></path>
+        <path d="M15 7h5"></path>
+        <circle cx="13" cy="7" r="2"></circle>
+        <path d="M4 17h4"></path>
+        <path d="M12 17h8"></path>
+        <circle cx="10" cy="17" r="2"></circle>
+      </symbol>
+      <symbol id="icon-sound" viewBox="0 0 24 24">
+        <path d="M5 10v4h4l5 4V6l-5 4H5Z"></path>
+        <path d="M17 9.5c.9 1.2.9 3.8 0 5"></path>
+        <path d="M19.5 7c2 2.6 2 7.4 0 10"></path>
+      </symbol>
+      <symbol id="icon-root" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"></circle>
+        <path d="M12 12v8"></path>
+        <path d="M12 18c-2 0-3.3 1-4.6 2"></path>
+        <path d="M12 18c2 0 3.3 1 4.6 2"></path>
+      </symbol>
+      <symbol id="icon-lotus" viewBox="0 0 24 24">
+        <path d="M12 20c-4.8-2.8-6.8-6-6.2-10 3.6 1 5.6 4 6.2 10Z"></path>
+        <path d="M12 20c4.8-2.8 6.8-6 6.2-10-3.6 1-5.6 4-6.2 10Z"></path>
+        <path d="M12 20c-1.8-4.2-1.8-8 0-11.5 1.8 3.5 1.8 7.3 0 11.5Z"></path>
+      </symbol>
+      <symbol id="icon-branch" viewBox="0 0 24 24">
+        <circle cx="6" cy="6" r="2"></circle>
+        <circle cx="18" cy="18" r="2"></circle>
+        <circle cx="6" cy="18" r="2"></circle>
+        <path d="M6 8v8"></path>
+        <path d="M8 18h8"></path>
+        <path d="M8 6c5.5 0 6.5 3.5 8.3 9.9"></path>
+      </symbol>
+      <symbol id="icon-tea" viewBox="0 0 24 24">
+        <path d="M5 9h10v5a5 5 0 0 1-10 0V9Z"></path>
+        <path d="M15 10h2.2a2.3 2.3 0 0 1 0 4.6H15"></path>
+        <path d="M4 19h13"></path>
+        <path d="M9 6c-.7-.8-.7-1.7 0-2.6"></path>
+        <path d="M12 6c-.7-.8-.7-1.7 0-2.6"></path>
+      </symbol>
+    </svg>
+
     <button class="audio-toggle" id="audioToggle" type="button" data-audio="off" aria-label="Turn sound on" title="Turn sound on">
-      <span class="speaker-icon" aria-hidden="true"><span></span></span>
+      <svg class="symbol-icon" aria-hidden="true"><use href="#icon-sound"></use></svg>
     </button>
 
     <section class="mantra" id="mantra" aria-live="polite">
-      <h1 id="mantraLine">Stillness is here.</h1>
+      <h1 id="mantraLine">I am aligned.</h1>
     </section>
 
     <section class="focus" aria-hidden="true">
@@ -780,7 +883,7 @@
     <aside class="chakra-panel side-panel gratitude-panel" id="gratitudePanel" data-collapsed="true" aria-label="Gratitude and support controls">
       <div class="chakra-head">
         <div>
-          <strong class="chakra-name">Gratitude</strong>
+          <strong class="chakra-name"><svg class="symbol-icon" aria-hidden="true"><use href="#icon-heart"></use></svg><span>Gratitude</span></strong>
         </div>
         <div class="chakra-head-actions">
           <button class="panel-toggle" id="gratitudeToggle" type="button" aria-label="Expand gratitude controls" aria-expanded="false" title="Expand gratitude controls"></button>
@@ -790,12 +893,12 @@
       <div class="chakra-body" id="gratitudeBody">
         <p class="gratitude-line" id="gratitudeLine">Thank you for the guidance already here.</p>
         <div class="soft-actions">
-          <button class="soft-command" id="gratitudeNext" type="button">New seed</button>
-          <button class="soft-command" id="gratitudePlant" type="button">Plant thanks</button>
+          <button class="soft-command" id="gratitudeNext" type="button"><svg class="symbol-icon" aria-hidden="true"><use href="#icon-seed"></use></svg><span>New seed</span></button>
+          <button class="soft-command" id="gratitudePlant" type="button"><svg class="symbol-icon" aria-hidden="true"><use href="#icon-lotus"></use></svg><span>Plant thanks</span></button>
         </div>
         <div class="link-stack">
-          <a class="support-link" href="https://github.com/analysethatltd-hub/manifestation-meditation-page" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">repo</span></a>
-          <a class="support-link" id="greenTeaLink" href="#" aria-disabled="true">Green Tea <span aria-hidden="true">soon</span></a>
+          <a class="support-link" href="https://github.com/analysethatltd-hub/manifestation-meditation-page" target="_blank" rel="noopener noreferrer"><span><svg class="symbol-icon" aria-hidden="true"><use href="#icon-branch"></use></svg> GitHub</span><span aria-hidden="true">repo</span></a>
+          <a class="support-link" id="greenTeaLink" href="#" aria-disabled="true"><span><svg class="symbol-icon" aria-hidden="true"><use href="#icon-tea"></use></svg> Green Tea</span><span aria-hidden="true">soon</span></a>
         </div>
       </div>
     </aside>
@@ -803,7 +906,7 @@
     <aside class="chakra-panel side-panel breath-panel" id="breathPanel" data-collapsed="true" aria-label="Breath work controls">
       <div class="chakra-head">
         <div>
-          <strong class="chakra-name">Breath</strong>
+          <strong class="chakra-name"><svg class="symbol-icon" aria-hidden="true"><use href="#icon-breath"></use></svg><span>Breath</span></strong>
         </div>
         <div class="chakra-head-actions">
           <button class="panel-toggle" id="breathToggle" type="button" aria-label="Expand breath controls" aria-expanded="false" title="Expand breath controls"></button>
@@ -839,14 +942,14 @@
           </span>
           <input id="restRange" type="range" min="0" max="8" step="0.2" value="2.2" data-breath-index="3" aria-label="Rest length">
         </label>
-        <button class="soft-command breath-reset" id="breathReset" type="button">Reset</button>
+        <button class="soft-command breath-reset" id="breathReset" type="button"><svg class="symbol-icon" aria-hidden="true"><use href="#icon-breath"></use></svg><span>Reset</span></button>
       </div>
     </aside>
 
     <aside class="chakra-panel" id="chakraPanel" aria-label="Chakra frequency controls">
       <div class="chakra-head">
         <div>
-          <strong class="chakra-name" id="chakraName">Root</strong>
+          <strong class="chakra-name"><svg class="symbol-icon" aria-hidden="true"><use href="#icon-root"></use></svg><span id="chakraName">Root</span></strong>
         </div>
         <div class="chakra-head-actions">
           <output class="chakra-frequency" id="chakraFrequency">396 Hz</output>
@@ -943,7 +1046,7 @@
       ];
 
       const MANTRAS = [
-        "Stillness is here.",
+        "I am aligned.",
         "I remember who I am.",
         "My desires are purified in love.",
         "What is meant for me knows its way.",

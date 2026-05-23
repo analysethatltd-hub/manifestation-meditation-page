@@ -1,6 +1,6 @@
 # Manifestation Meditation Page
 
-A single-page meditation space for prayer, breath work, desire, gratitude, sound, colour, sacred geometry, and one very busy little bee.
+A single-page meditation space for breath work, desire, gratitude, sound, colour, sacred geometry, and one very busy little bee.
 
 [Open the live page](https://analysethatltd-hub.github.io/manifestation-meditation-page/)
 
@@ -14,7 +14,7 @@ This is a static GitHub Pages site built as a quiet focus object rather than a c
 
 ## Features
 
-- Rotating manifestation mantras centred around God, identity, desire, surrender, and receiving well.
+- Rotating manifestation mantras centred around identity, desire, surrender, alignment, and receiving well.
 - A fixed breath-work circle that guides inhale, hold, release, and rest.
 - Breath controls on the right panel for adjusting each phase length without changing the default rhythm.
 - Chakra frequency controls with manual tuning, volume, and automatic upward progression.
@@ -22,6 +22,7 @@ This is a static GitHub Pages site built as a quiet focus object rather than a c
 - Living sacred-geometry background with slow colour shifts and chakra-responsive glow.
 - A gratitude panel with rotating gratitude seeds, a flower-planting action, a GitHub link, and a themed Green Tea support slot.
 - A tiny bee that scouts, darts, pollinates flowers, leaves pollen trails, and gets startled away if you try to tap it.
+- Soft symbolic iconography for gratitude, seeds, breath waves, sound, root energy, tea, and source links.
 - Local garden persistence, so flowers and trees gradually build up across sessions.
 
 ## Green Tea Support Setup
