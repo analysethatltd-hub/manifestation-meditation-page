@@ -152,6 +152,7 @@
       translate: -50% 0;
       text-align: center;
       pointer-events: none;
+      transition: top 420ms ease;
     }
 
     h1 {
@@ -292,10 +293,10 @@
       line-height: 1;
     }
 
-    .audio-toggle {
+    .audio-toggle,
+    .garden-reset {
       position: fixed;
       top: 1rem;
-      right: 1rem;
       z-index: 14;
       display: grid;
       place-items: center;
@@ -310,6 +311,28 @@
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+    }
+
+    .audio-toggle {
+      right: 1rem;
+    }
+
+    .garden-reset {
+      left: 1rem;
+      z-index: 31;
+      color: rgba(184, 255, 212, 0.84);
+    }
+
+    .garden-reset:hover,
+    .garden-reset:focus-visible {
+      border-color: rgba(184, 255, 212, 0.38);
+      color: rgba(232, 255, 240, 0.96);
+      box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.22), 0 0 1.6rem rgba(104, 255, 178, 0.18);
+      outline: none;
+    }
+
+    .garden-reset[data-resetting="true"] {
+      animation: gardenResetPulse 820ms ease-out;
     }
 
     .speaker-icon {
@@ -382,6 +405,11 @@
     .audio-toggle .symbol-icon {
       inline-size: 1.18rem;
       block-size: 1.18rem;
+    }
+
+    .garden-reset .symbol-icon {
+      inline-size: 1.08rem;
+      block-size: 1.08rem;
     }
 
     .audio-toggle[data-audio="off"] .symbol-icon {
@@ -776,6 +804,26 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .range-name {
+      color: rgba(255, 247, 221, 0.72);
+      font-size: 0.76rem;
+      font-weight: 650;
+      line-height: 1.15;
+    }
+
+    .range-hint {
+      color: rgba(255, 247, 221, 0.48);
+      font-size: 0.66rem;
+      line-height: 1.15;
+    }
+
+    .range-meta {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.42rem;
+      min-width: 0;
+    }
+
     @keyframes fieldDrift {
       0% {
         background-position: 0% 52%, 48% 22%;
@@ -847,12 +895,34 @@
       }
     }
 
+    @keyframes gardenResetPulse {
+      0% {
+        transform: scale(1);
+      }
+      45% {
+        transform: scale(0.88) rotate(-18deg);
+        border-color: rgba(184, 255, 212, 0.54);
+        color: rgba(232, 255, 240, 1);
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
     @media (max-width: 760px) {
-      .audio-toggle {
+      .audio-toggle,
+      .garden-reset {
         top: 0.75rem;
-        right: 0.75rem;
         inline-size: 2.7rem;
         block-size: 2.7rem;
+      }
+
+      .audio-toggle {
+        right: 0.75rem;
+      }
+
+      .garden-reset {
+        left: 0.75rem;
       }
 
       .sound-invite {
@@ -868,6 +938,11 @@
       .mantra {
         top: 2rem;
         width: min(28rem, calc(100vw - 2rem));
+      }
+
+      html[data-audio-active="false"] .mantra {
+        top: 5.1rem;
+        width: min(28rem, calc(100vw - 1.5rem));
       }
 
       h1,
@@ -1032,8 +1107,17 @@
         <path d="M9 6c-.7-.8-.7-1.7 0-2.6"></path>
         <path d="M12 6c-.7-.8-.7-1.7 0-2.6"></path>
       </symbol>
+      <symbol id="icon-reset" viewBox="0 0 24 24">
+        <path d="M6 9a7 7 0 1 1 1.4 8.8"></path>
+        <path d="M6 9H3.5V6.5"></path>
+        <path d="M8 15c1.1-1.6 2.4-2.4 4-2.4s2.9.8 4 2.4"></path>
+        <path d="M12 12.6V8.5"></path>
+      </symbol>
     </svg>
 
+    <button class="garden-reset" id="gardenReset" type="button" aria-label="Reset garden" title="Reset garden">
+      <svg class="symbol-icon" aria-hidden="true"><use href="#icon-reset"></use></svg>
+    </button>
     <button class="audio-toggle" id="audioToggle" type="button" data-audio="off" aria-label="Turn sound on" title="Turn sound on">
       <svg class="symbol-icon" aria-hidden="true"><use href="#icon-sound"></use></svg>
     </button>
@@ -1145,6 +1229,7 @@
 
         <label class="chakra-row range-field">
           <span class="control-line">
+            <span class="range-name">Frequency</span>
             <output class="range-value" id="frequencyValue">396 Hz</output>
           </span>
           <input id="frequencyRange" type="range" min="174" max="963" step="1" value="396" aria-label="Frequency">
@@ -1152,9 +1237,10 @@
 
         <label class="chakra-row range-field">
           <span class="control-line">
-            <output class="range-value" id="volumeValue">52%</output>
+            <span class="range-meta"><span class="range-name">Volume</span><span class="range-hint">capped at 80%</span></span>
+            <output class="range-value" id="volumeValue">52 of 80</output>
           </span>
-          <input id="volumeRange" type="range" min="0" max="80" step="1" value="52" aria-label="Volume">
+          <input id="volumeRange" type="range" min="0" max="80" step="1" value="52" aria-label="Volume, capped at 80 percent">
         </label>
       </div>
     </aside>
@@ -1174,6 +1260,7 @@
         phase: document.getElementById("phaseText"),
         count: document.getElementById("phaseCount"),
         audioToggle: document.getElementById("audioToggle"),
+        gardenReset: document.getElementById("gardenReset"),
         soundInvite: document.getElementById("soundInvite"),
         audioDebug: document.getElementById("audioDebug"),
         mobileAudio: document.getElementById("mobileAudioFallback"),
@@ -1317,8 +1404,10 @@
         },
         garden: {
           plants: [],
+          hasSavedGarden: false,
           lastTick: performance.now(),
           lastSave: 0,
+          resetRippleUntil: 0,
           plantCount: 0,
           bee: {
             x: 0,
@@ -1332,6 +1421,7 @@
             actionUntil: performance.now() + 3200,
             nextPlantAt: performance.now() + 7400,
             pollen: 0,
+            agitatedUntil: 0,
             stepSeed: Math.random() * Math.PI * 2,
             wingSeed: Math.random() * Math.PI * 2
           }
@@ -1481,7 +1571,7 @@
         els.chakraFrequency.textContent = formatFrequency(state.frequency);
         els.frequencyValue.textContent = formatFrequency(state.frequency);
         els.frequencyRange.value = Math.round(state.frequency);
-        els.volumeValue.textContent = `${Math.round(state.volume * 100)}%`;
+        els.volumeValue.textContent = `${Math.round(state.volume * 100)} of 80`;
         els.volumeRange.value = Math.round(state.volume * 100);
         updateRangeFill(els.frequencyRange);
         updateRangeFill(els.volumeRange);
@@ -1570,14 +1660,14 @@
       }
 
       function shouldPrimeMediaAudio() {
-        return shouldUseMediaOnly() || state.isMobileAudio;
+        return shouldUseMediaOnly();
       }
 
       function currentAudioMode() {
         if (shouldUseMediaOnly()) {
           return "media";
         }
-        if (state.isMobileAudio && state.mediaAudio && !state.mediaAudio.paused) {
+        if (shouldUseMediaOnly() && state.mediaAudio && !state.mediaAudio.paused) {
           return "hybrid";
         }
         return "web-audio";
@@ -1597,8 +1687,7 @@
         if (!state.audioEnabled || shouldUseMediaOnly()) {
           return 0;
         }
-        const mobileScale = state.isMobileAudio ? 0.72 : 1;
-        return state.volume * mobileScale;
+        return state.volume;
       }
 
       function setFrequency(value) {
@@ -1674,6 +1763,7 @@
         });
 
         els.breathReset.addEventListener("click", resetBreathDurations);
+        els.gardenReset.addEventListener("click", resetGarden);
 
         els.gratitudeNext.addEventListener("click", () => {
           setGratitude(state.gratitudeIndex + 1);
@@ -1890,6 +1980,7 @@
           const plants = state.garden.plants.slice(-GARDEN_LIMIT);
           window.localStorage.setItem(GARDEN_KEY, JSON.stringify({ plants }));
           state.garden.plants = plants;
+          state.garden.hasSavedGarden = true;
           state.garden.lastSave = performance.now();
         } catch (error) {
           state.garden.lastSave = performance.now();
@@ -1900,6 +1991,7 @@
         try {
           const saved = JSON.parse(window.localStorage.getItem(GARDEN_KEY) || "{}");
           if (Array.isArray(saved.plants)) {
+            state.garden.hasSavedGarden = true;
             state.garden.plants = saved.plants
               .filter((plant) => Number.isFinite(plant.nx) && Number.isFinite(plant.ny) && plant.plantedAt)
               .slice(-GARDEN_LIMIT);
@@ -1911,7 +2003,7 @@
       }
 
       function seedGarden() {
-        if (state.garden.plants.length > 0 || state.width === 0 || state.height === 0) {
+        if (state.garden.hasSavedGarden || state.garden.plants.length > 0 || state.width === 0 || state.height === 0) {
           return;
         }
 
@@ -1927,6 +2019,26 @@
         }
         state.garden.plantCount = state.garden.plants.length;
         saveGarden();
+      }
+
+      function resetGarden() {
+        const now = performance.now();
+        state.garden.plants = [];
+        state.garden.plantCount = 0;
+        state.garden.hasSavedGarden = true;
+        state.garden.resetRippleUntil = now + 1450;
+        try {
+          window.localStorage.setItem(GARDEN_KEY, JSON.stringify({ plants: [] }));
+        } catch (error) {
+          state.garden.lastSave = now;
+        }
+        placeBee();
+        state.garden.bee.pollen = 0.3;
+        state.garden.bee.agitatedUntil = 0;
+        els.gardenReset.dataset.resetting = "true";
+        window.setTimeout(() => {
+          delete els.gardenReset.dataset.resetting;
+        }, 860);
       }
 
       function plantGratitude() {
@@ -1953,6 +2065,14 @@
           const age = now - plant.plantedAt;
           return age > plant.matureMs * 0.18;
         });
+
+        const bee = state.garden.bee;
+        if (performance.now() < bee.agitatedUntil) {
+          return {
+            ...randomGardenPoint(),
+            action: "dart"
+          };
+        }
 
         if (plants.length > 0 && Math.random() < 0.68) {
           const plant = plants[Math.floor(Math.random() * plants.length)];
@@ -1996,23 +2116,36 @@
       function startleBee(x, y, pointerType = "mouse") {
         const bee = state.garden.bee;
         if (!bee.x || !bee.y) {
-          return;
+          return false;
         }
 
         const distance = Math.hypot(bee.x - x, bee.y - y);
         const startleRadius = pointerType === "touch" ? 76 : 48;
         if (distance > startleRadius) {
-          return;
+          return false;
         }
 
+        const now = performance.now();
         const angle = Math.atan2(bee.y - y, bee.x - x) + (Math.random() * 0.7 - 0.35);
-        const jump = pointerType === "touch" ? 230 : 180;
+        const tappedBody = distance < (pointerType === "touch" ? 42 : 26);
+        const jump = tappedBody
+          ? (pointerType === "touch" ? 300 : 240)
+          : (pointerType === "touch" ? 230 : 180);
         bee.targetX = clamp(bee.x + Math.cos(angle) * jump, 24, state.width - 24);
         bee.targetY = clamp(bee.y + Math.sin(angle) * jump, 24, state.height - 24);
         bee.action = "dart";
-        bee.actionUntil = performance.now() + 900 + Math.random() * 650;
+        bee.actionUntil = now + (tappedBody ? 1450 : 900) + Math.random() * 650;
         bee.pollen = Math.max(bee.pollen, 0.86);
-        document.documentElement.dataset.bee = "startled";
+        if (tappedBody) {
+          bee.agitatedUntil = now + 1500;
+          bee.stepSeed = Math.random() * Math.PI * 2;
+          bee.wingSeed = Math.random() * Math.PI * 2;
+          document.documentElement.dataset.bee = "agitated";
+        } else {
+          bee.agitatedUntil = Math.max(bee.agitatedUntil, now + 720);
+          document.documentElement.dataset.bee = "startled";
+        }
+        return true;
       }
 
       function pollinateNearBee(now) {
@@ -2057,9 +2190,10 @@
             const ny = dy / distance;
             const px = -ny;
             const py = nx;
+            const agitated = now < bee.agitatedUntil;
             const baseSpeed = bee.action === "dart" ? 84 : bee.action === "pollinate" ? 36 : 54;
             const pulse = Math.sin(now * 0.012 + bee.stepSeed) * (bee.action === "dart" ? 18 : 8);
-            const wobble = Math.sin(now * 0.02 + bee.stepSeed) * (bee.action === "pollinate" ? 18 : 30);
+            const wobble = Math.sin(now * (agitated ? 0.052 : 0.02) + bee.stepSeed) * (agitated ? 54 : bee.action === "pollinate" ? 18 : 30);
             bee.vx = nx * (baseSpeed + pulse) + px * wobble;
             bee.vy = ny * (baseSpeed + pulse) + py * wobble;
             bee.x += bee.vx * dt;
@@ -2086,6 +2220,10 @@
           }
 
           bee.pollen = Math.max(0, bee.pollen - dt * 0.72);
+          if (bee.agitatedUntil && now > bee.agitatedUntil) {
+            bee.agitatedUntil = 0;
+            document.documentElement.dataset.bee = bee.action;
+          }
           bee.x = clamp(bee.x, 16, state.width - 16);
           bee.y = clamp(bee.y, 16, state.height - 16);
         }
@@ -2173,35 +2311,53 @@
         const size = clamp(Math.min(state.width, state.height) / 650, 0.76, 1.22);
         const speed = Math.hypot(bee.vx, bee.vy);
         const angle = speed > 1 ? Math.atan2(bee.vy, bee.vx) : 0;
-        const hover = Math.sin(now * 0.009 + bee.stepSeed) * 2.2;
-        const wing = Math.sin(now * 0.064 + bee.wingSeed);
+        const agitated = now < bee.agitatedUntil;
+        const agitation = agitated ? clamp((bee.agitatedUntil - now) / 1500, 0, 1) : 0;
+        const tremble = agitated ? Math.sin(now * 0.18 + bee.stepSeed) * 2.8 * agitation : 0;
+        const hover = Math.sin(now * 0.009 + bee.stepSeed) * 2.2 + tremble;
+        const wing = Math.sin(now * (agitated ? 0.13 : 0.064) + bee.wingSeed);
         const pollenGlow = bee.action === "pollinate" ? Math.max(bee.pollen, 0.28) : bee.pollen;
+        document.documentElement.dataset.bee = agitated ? "agitated" : bee.action;
 
         gardenCtx.save();
-        gardenCtx.translate(bee.x, bee.y + 7);
-        gardenCtx.globalAlpha = 0.22;
+        gardenCtx.translate(bee.x + tremble * 0.45, bee.y + 7);
+        gardenCtx.globalAlpha = agitated ? 0.3 : 0.22;
         gardenCtx.fillStyle = "rgba(5, 8, 7, 0.5)";
         gardenCtx.beginPath();
-        gardenCtx.ellipse(0, 0, 8.8 * size, 2.2 * size, 0, 0, Math.PI * 2);
+        gardenCtx.ellipse(0, 0, (8.8 + agitation * 2.6) * size, 2.2 * size, 0, 0, Math.PI * 2);
         gardenCtx.fill();
         gardenCtx.restore();
 
         gardenCtx.save();
-        gardenCtx.translate(bee.x, bee.y + hover);
-        gardenCtx.rotate(angle);
+        gardenCtx.translate(bee.x + tremble * 0.55, bee.y + hover);
+        gardenCtx.rotate(angle + (agitated ? Math.sin(now * 0.16) * 0.2 * agitation : 0));
         gardenCtx.scale(size, size);
 
-        gardenCtx.globalAlpha = 0.34 + Math.abs(wing) * 0.18;
+        if (agitated) {
+          gardenCtx.globalAlpha = 0.22 * agitation;
+          gardenCtx.strokeStyle = "rgba(255, 235, 143, 0.82)";
+          gardenCtx.lineWidth = 1.1;
+          gardenCtx.beginPath();
+          gardenCtx.moveTo(-3, -11);
+          gardenCtx.lineTo(-7, -16);
+          gardenCtx.moveTo(3, -11);
+          gardenCtx.lineTo(8, -16);
+          gardenCtx.moveTo(0, 10);
+          gardenCtx.lineTo(-4, 15);
+          gardenCtx.stroke();
+        }
+
+        gardenCtx.globalAlpha = 0.34 + Math.abs(wing) * (agitated ? 0.28 : 0.18);
         gardenCtx.fillStyle = "rgba(214, 250, 255, 0.74)";
         gardenCtx.beginPath();
-        gardenCtx.ellipse(-2.2, -5.4, 7.6, 3.1, -0.72 - wing * 0.18, 0, Math.PI * 2);
-        gardenCtx.ellipse(-2.2, 5.4, 7.6, 3.1, 0.72 + wing * 0.18, 0, Math.PI * 2);
+        gardenCtx.ellipse(-2.2, -5.4, 7.6 + agitation * 1.4, 3.1, -0.72 - wing * 0.28, 0, Math.PI * 2);
+        gardenCtx.ellipse(-2.2, 5.4, 7.6 + agitation * 1.4, 3.1, 0.72 + wing * 0.28, 0, Math.PI * 2);
         gardenCtx.fill();
 
         gardenCtx.globalAlpha = 0.95;
-        gardenCtx.fillStyle = "rgba(251, 198, 64, 0.98)";
+        gardenCtx.fillStyle = agitated ? "rgba(255, 211, 70, 1)" : "rgba(251, 198, 64, 0.98)";
         gardenCtx.beginPath();
-        gardenCtx.ellipse(0, 0, 10.4, 6.1, 0, 0, Math.PI * 2);
+        gardenCtx.ellipse(0, 0, 10.4 + agitation * 0.8, 6.1, 0, 0, Math.PI * 2);
         gardenCtx.fill();
 
         gardenCtx.fillStyle = "rgba(21, 17, 13, 0.9)";
@@ -2233,13 +2389,13 @@
         gardenCtx.closePath();
         gardenCtx.fill();
 
-        if (pollenGlow > 0) {
-          gardenCtx.globalAlpha = pollenGlow * 0.72;
-          gardenCtx.fillStyle = "rgba(255, 235, 143, 0.92)";
-          for (let dot = 0; dot < 5; dot += 1) {
+        if (pollenGlow > 0 || agitated) {
+          gardenCtx.globalAlpha = Math.max(pollenGlow * 0.72, agitated ? 0.48 * agitation : 0);
+          gardenCtx.fillStyle = agitated ? "rgba(255, 224, 91, 0.94)" : "rgba(255, 235, 143, 0.92)";
+          for (let dot = 0; dot < (agitated ? 8 : 5); dot += 1) {
             const drift = now * 0.004 + dot;
             gardenCtx.beginPath();
-            gardenCtx.arc(-13 - dot * 3.6, Math.sin(drift) * 4.6, 1.2 - dot * 0.1, 0, Math.PI * 2);
+            gardenCtx.arc(-13 - dot * 3.6, Math.sin(drift) * (agitated ? 7.2 : 4.6), Math.max(0.6, 1.2 - dot * 0.1), 0, Math.PI * 2);
             gardenCtx.fill();
           }
         }
@@ -2249,6 +2405,18 @@
       function drawGarden(now) {
         gardenCtx.clearRect(0, 0, state.width, state.height);
         gardenCtx.globalCompositeOperation = "source-over";
+
+        if (now < state.garden.resetRippleUntil) {
+          const progress = 1 - (state.garden.resetRippleUntil - now) / 1450;
+          gardenCtx.save();
+          gardenCtx.globalAlpha = (1 - progress) * 0.42;
+          gardenCtx.strokeStyle = "rgba(184, 255, 212, 0.62)";
+          gardenCtx.lineWidth = 1.2;
+          gardenCtx.beginPath();
+          gardenCtx.arc(state.width / 2, state.height / 2, Math.min(state.width, state.height) * (0.18 + progress * 0.42), 0, Math.PI * 2);
+          gardenCtx.stroke();
+          gardenCtx.restore();
+        }
 
         const plants = state.garden.plants.slice().sort((a, b) => a.ny - b.ny);
         plants.forEach((plant) => {
@@ -2756,7 +2924,7 @@
         }
 
         document.documentElement.dataset.audio = "starting";
-        document.documentElement.dataset.audioMode = state.isMobileAudio ? "hybrid" : "web-audio";
+        document.documentElement.dataset.audioMode = "web-audio";
         let audio;
         try {
           audio = new AudioContext();
@@ -2848,7 +3016,7 @@
         });
 
         const noise = audio.createBufferSource();
-        const buffer = createSeamlessAirBuffer(audio, state.isMobileAudio ? 24 : 48);
+        const buffer = createSeamlessAirBuffer(audio, 48);
         const noiseGain = audio.createGain();
         noise.buffer = buffer;
         noise.loop = true;
@@ -2924,7 +3092,7 @@
 
       function bindBeeInteraction() {
         let lastMouseStartle = 0;
-        const canStartle = (event) => !event.target.closest(".chakra-panel, .audio-toggle, .sound-invite");
+        const canStartle = (event) => !event.target.closest(".chakra-panel, .audio-toggle, .garden-reset, .sound-invite");
 
         window.addEventListener("pointerdown", (event) => {
           if (canStartle(event)) {
@@ -2938,8 +3106,9 @@
           }
           const now = performance.now();
           if (now - lastMouseStartle > 650) {
-            startleBee(event.clientX, event.clientY, "mouse");
-            lastMouseStartle = now;
+            if (startleBee(event.clientX, event.clientY, "mouse")) {
+              lastMouseStartle = now;
+            }
           }
         }, { passive: true });
       }
