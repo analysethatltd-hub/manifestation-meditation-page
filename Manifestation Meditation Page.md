@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Create a single static web page that helps Glenn focus on stillness, identity, desire, and quiet manifestation without presenting itself as a religious application.
+Create a single static web page that helps Glenn focus on stillness, identity, desire, and quiet manifestation without presenting itself as a faith-specific application.
 
 The page should feel like a contemplative object, not an app. It now includes a discreet chakra tuning panel because the user explicitly requested audio controls after the original no-controls direction.
 
@@ -33,8 +33,10 @@ The page should feel like a contemplative object, not an app. It now includes a 
 - Mobile and bee update on 2026-05-23: minimize the chakra tuning panel by default on mobile, support tap and swipe expand/collapse gestures, replace the monk with a bee that scouts, darts, hovers, pollinates, and leaves growth behind, and start Web Audio from explicit touch/click/key gestures for mobile browser compatibility.
 - Three-panel update on 2026-05-23: add collapsed left/right glass panels for gratitude/support and breath timing, add a top-right sound toggle for mobile browser audio startup, add bee startle behavior on touch/click proximity, and create a GitHub README with screenshots. The Green Tea support link remains a configurable placeholder until the user provides a donation URL.
 - Mobile audio repair on 2026-05-23: make the top-right sound button the only creator of the Web Audio graph, prevent one mobile tap from double-toggling via pointer/touch/click event chains, and add a tiny Web Audio unlock pulse for stricter iOS/WebView audio startup behavior. This follows browser autoplay policy guidance that Web Audio must be resumed from user interaction.
-- Non-religious language update on 2026-05-23: remove explicit God/prayer wording from the public page and README so the project presents as universal manifestation meditation rather than a religious application.
+- Universal language update on 2026-05-23: remove explicit faith-specific wording from the public page and README so the project presents as universal manifestation meditation.
 - Iconology update on 2026-05-23: set the opening mantra to `I am aligned.` and bring the preferred mobile-use image language into the app through small non-religious SVG symbols for gratitude/heart, seeds, breath waves, chakra/root, sound, tea, and source links.
+- Mobile audio fallback repair on 2026-05-23: add a generated looping WAV/HTML audio fallback for mobile browser apps, started from the same sound button gesture, while keeping Web Audio for richer desktop playback. A hidden `?force-media-audio` query flag exists for local QA of the fallback path.
+- Mobile audio fallback repair 2 on 2026-05-23: keep one pre-attached 432 Hz media loop for mobile browsers and retune it with `playbackRate` instead of swapping generated audio files, because source swaps can stop playback after the initial mobile gesture.
 
 ## Files
 
