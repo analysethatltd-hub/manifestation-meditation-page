@@ -292,6 +292,73 @@
       line-height: 1;
     }
 
+    .audio-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 14;
+      display: grid;
+      place-items: center;
+      inline-size: 2.9rem;
+      block-size: 2.9rem;
+      border: 1px solid rgba(255, 247, 221, 0.16);
+      border-radius: 50%;
+      color: rgba(255, 247, 221, 0.82);
+      background: rgba(5, 8, 7, 0.5);
+      box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.22), inset 0 0 1.2rem rgba(255, 247, 221, 0.04);
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+    }
+
+    .speaker-icon {
+      position: relative;
+      inline-size: 1rem;
+      block-size: 1rem;
+    }
+
+    .speaker-icon::before {
+      content: "";
+      position: absolute;
+      left: 0.04rem;
+      top: 0.28rem;
+      inline-size: 0.34rem;
+      block-size: 0.44rem;
+      border-radius: 2px;
+      background: currentColor;
+    }
+
+    .speaker-icon::after {
+      content: "";
+      position: absolute;
+      left: 0.25rem;
+      top: 0.14rem;
+      border-top: 0.36rem solid transparent;
+      border-bottom: 0.36rem solid transparent;
+      border-right: 0.54rem solid currentColor;
+    }
+
+    .audio-toggle[data-audio="on"] {
+      color: rgba(184, 255, 212, 0.95);
+      border-color: rgba(184, 255, 212, 0.34);
+      box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.22), 0 0 1.4rem rgba(104, 255, 178, 0.22);
+    }
+
+    .audio-toggle[data-audio="off"] .speaker-icon {
+      opacity: 0.58;
+    }
+
+    .audio-toggle[data-audio="off"] .speaker-icon span {
+      position: absolute;
+      left: 0.12rem;
+      top: 0.47rem;
+      inline-size: 1rem;
+      block-size: 2px;
+      border-radius: 999px;
+      background: currentColor;
+      transform: rotate(-42deg);
+      transform-origin: center;
+    }
+
     .chakra-panel {
       position: fixed;
       left: 1rem;
@@ -308,6 +375,24 @@
       font-family: "Segoe UI", Arial, sans-serif;
       touch-action: pan-y;
       transition: width 300ms ease, padding 300ms ease, background 300ms ease, box-shadow 300ms ease;
+    }
+
+    .side-panel {
+      top: 50%;
+      bottom: auto;
+      width: min(18.2rem, calc(100vw - 2rem));
+      transform: translateY(-50%);
+      --panel-hue: 154;
+    }
+
+    .gratitude-panel {
+      left: 1rem;
+    }
+
+    .breath-panel {
+      left: auto;
+      right: 1rem;
+      --panel-hue: 178;
     }
 
     .chakra-panel[data-collapsed="true"] {
@@ -343,7 +428,7 @@
     .chakra-name {
       display: block;
       margin-top: 0.1rem;
-      color: hsl(var(--chakra-hue), 88%, 74%);
+      color: hsl(var(--panel-hue, var(--chakra-hue)), 88%, 74%);
       font-size: 1rem;
       line-height: 1.2;
       font-weight: 700;
@@ -385,6 +470,67 @@
 
     .chakra-body {
       display: grid;
+    }
+
+    .gratitude-line {
+      margin: 0 0 0.7rem;
+      color: rgba(255, 247, 221, 0.82);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .soft-actions,
+    .link-stack {
+      display: grid;
+      gap: 0.42rem;
+    }
+
+    .soft-actions {
+      grid-template-columns: 1fr 1fr;
+      margin-bottom: 0.64rem;
+    }
+
+    .soft-command,
+    .support-link {
+      min-height: 2.15rem;
+      border: 1px solid rgba(255, 247, 221, 0.14);
+      border-radius: 8px;
+      color: rgba(255, 247, 221, 0.86);
+      background: rgba(255, 247, 221, 0.07);
+      font: 700 0.78rem/1 "Segoe UI", Arial, sans-serif;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .support-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 0.64rem;
+    }
+
+    .soft-command:hover,
+    .support-link:hover {
+      background: rgba(255, 247, 221, 0.12);
+    }
+
+    .support-link[aria-disabled="true"] {
+      opacity: 0.56;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .breath-controls {
+      display: grid;
+      gap: 0.52rem;
+    }
+
+    .breath-controls .chakra-row {
+      margin-top: 0;
+    }
+
+    .breath-reset {
+      margin-top: 0.1rem;
     }
 
     .chakra-buttons {
@@ -517,6 +663,13 @@
     }
 
     @media (max-width: 760px) {
+      .audio-toggle {
+        top: 0.75rem;
+        right: 0.75rem;
+        inline-size: 2.7rem;
+        block-size: 2.7rem;
+      }
+
       .prayer {
         top: 2rem;
         width: min(28rem, calc(100vw - 2rem));
@@ -532,7 +685,7 @@
         width: min(12.8rem, 54vmin);
       }
 
-      .chakra-panel {
+      .chakra-panel:not(.side-panel) {
         left: 50%;
         right: auto;
         bottom: 0.75rem;
@@ -543,9 +696,38 @@
         transform: translateX(-50%);
       }
 
-      .chakra-panel[data-collapsed="true"] {
+      .chakra-panel:not(.side-panel)[data-collapsed="true"] {
         width: min(14.8rem, calc(100vw - 1.5rem));
         padding: 0.52rem 0.62rem;
+      }
+
+      .side-panel {
+        top: auto;
+        bottom: 4.5rem;
+        padding: 0.56rem 0.62rem;
+        transform: none;
+      }
+
+      .side-panel[data-collapsed="true"] {
+        width: min(10.5rem, calc(50vw - 1rem));
+      }
+
+      .gratitude-panel {
+        left: 0.75rem;
+      }
+
+      .breath-panel {
+        right: 0.75rem;
+      }
+
+      .side-panel[data-collapsed="false"] {
+        left: 50%;
+        right: auto;
+        bottom: 4.5rem;
+        z-index: 12;
+        width: min(22rem, calc(100vw - 1.5rem));
+        padding: 0.68rem;
+        transform: translateX(-50%);
       }
 
       .chakra-buttons {
@@ -577,6 +759,10 @@
     <div class="axis-light" aria-hidden="true"></div>
     <div class="soft-rays" aria-hidden="true"></div>
 
+    <button class="audio-toggle" id="audioToggle" type="button" data-audio="off" aria-label="Turn sound on" title="Turn sound on">
+      <span class="speaker-icon" aria-hidden="true"><span></span></span>
+    </button>
+
     <section class="prayer" id="prayer" aria-live="polite">
       <h1 id="prayerLine">God is here.</h1>
     </section>
@@ -590,6 +776,72 @@
         <span class="count" id="phaseCount">4</span>
       </div>
     </section>
+
+    <aside class="chakra-panel side-panel gratitude-panel" id="gratitudePanel" data-collapsed="true" aria-label="Gratitude and support controls">
+      <div class="chakra-head">
+        <div>
+          <strong class="chakra-name">Gratitude</strong>
+        </div>
+        <div class="chakra-head-actions">
+          <button class="panel-toggle" id="gratitudeToggle" type="button" aria-label="Expand gratitude controls" aria-expanded="false" title="Expand gratitude controls"></button>
+        </div>
+      </div>
+
+      <div class="chakra-body" id="gratitudeBody">
+        <p class="gratitude-line" id="gratitudeLine">Thank you for the guidance already here.</p>
+        <div class="soft-actions">
+          <button class="soft-command" id="gratitudeNext" type="button">New seed</button>
+          <button class="soft-command" id="gratitudePlant" type="button">Plant thanks</button>
+        </div>
+        <div class="link-stack">
+          <a class="support-link" href="https://github.com/analysethatltd-hub/manifestation-meditation-page" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">repo</span></a>
+          <a class="support-link" id="greenTeaLink" href="#" aria-disabled="true">Green Tea <span aria-hidden="true">soon</span></a>
+        </div>
+      </div>
+    </aside>
+
+    <aside class="chakra-panel side-panel breath-panel" id="breathPanel" data-collapsed="true" aria-label="Breath work controls">
+      <div class="chakra-head">
+        <div>
+          <strong class="chakra-name">Breath</strong>
+        </div>
+        <div class="chakra-head-actions">
+          <button class="panel-toggle" id="breathToggle" type="button" aria-label="Expand breath controls" aria-expanded="false" title="Expand breath controls"></button>
+        </div>
+      </div>
+
+      <div class="chakra-body breath-controls" id="breathBody">
+        <label class="chakra-row range-field">
+          <span class="control-line">
+            <span>Inhale</span>
+            <output class="range-value" id="inhaleValue">4.2s</output>
+          </span>
+          <input id="inhaleRange" type="range" min="2" max="10" step="0.2" value="4.2" data-breath-index="0" aria-label="Inhale length">
+        </label>
+        <label class="chakra-row range-field">
+          <span class="control-line">
+            <span>Hold</span>
+            <output class="range-value" id="holdValue">2s</output>
+          </span>
+          <input id="holdRange" type="range" min="0" max="8" step="0.2" value="2" data-breath-index="1" aria-label="Hold length">
+        </label>
+        <label class="chakra-row range-field">
+          <span class="control-line">
+            <span>Release</span>
+            <output class="range-value" id="releaseValue">5.6s</output>
+          </span>
+          <input id="releaseRange" type="range" min="2" max="12" step="0.2" value="5.6" data-breath-index="2" aria-label="Release length">
+        </label>
+        <label class="chakra-row range-field">
+          <span class="control-line">
+            <span>Rest</span>
+            <output class="range-value" id="restValue">2.2s</output>
+          </span>
+          <input id="restRange" type="range" min="0" max="8" step="0.2" value="2.2" data-breath-index="3" aria-label="Rest length">
+        </label>
+        <button class="soft-command breath-reset" id="breathReset" type="button">Reset</button>
+      </div>
+    </aside>
 
     <aside class="chakra-panel" id="chakraPanel" aria-label="Chakra frequency controls">
       <div class="chakra-head">
@@ -640,6 +892,25 @@
         line: document.getElementById("prayerLine"),
         phase: document.getElementById("phaseText"),
         count: document.getElementById("phaseCount"),
+        audioToggle: document.getElementById("audioToggle"),
+        gratitudePanel: document.getElementById("gratitudePanel"),
+        gratitudeBody: document.getElementById("gratitudeBody"),
+        gratitudeToggle: document.getElementById("gratitudeToggle"),
+        gratitudeLine: document.getElementById("gratitudeLine"),
+        gratitudeNext: document.getElementById("gratitudeNext"),
+        gratitudePlant: document.getElementById("gratitudePlant"),
+        greenTeaLink: document.getElementById("greenTeaLink"),
+        breathPanel: document.getElementById("breathPanel"),
+        breathBody: document.getElementById("breathBody"),
+        breathToggle: document.getElementById("breathToggle"),
+        breathReset: document.getElementById("breathReset"),
+        breathRanges: Array.from(document.querySelectorAll("[data-breath-index]")),
+        breathOutputs: [
+          document.getElementById("inhaleValue"),
+          document.getElementById("holdValue"),
+          document.getElementById("releaseValue"),
+          document.getElementById("restValue")
+        ],
         chakraPanel: document.getElementById("chakraPanel"),
         chakraBody: document.getElementById("chakraBody"),
         chakraName: document.getElementById("chakraName"),
@@ -653,11 +924,12 @@
         volumeValue: document.getElementById("volumeValue")
       };
 
+      const DEFAULT_BREATH_MS = [4200, 2000, 5600, 2200];
       const BREATH = [
-        { name: "inhale", ms: 4200, scale: 1.12, hue: 42 },
-        { name: "hold", ms: 2000, scale: 1.12, hue: 50 },
-        { name: "release", ms: 5600, scale: 0.72, hue: 168 },
-        { name: "rest", ms: 2200, scale: 0.78, hue: 326 }
+        { name: "inhale", ms: DEFAULT_BREATH_MS[0], scale: 1.12, hue: 42 },
+        { name: "hold", ms: DEFAULT_BREATH_MS[1], scale: 1.12, hue: 50 },
+        { name: "release", ms: DEFAULT_BREATH_MS[2], scale: 0.72, hue: 168 },
+        { name: "rest", ms: DEFAULT_BREATH_MS[3], scale: 0.78, hue: 326 }
       ];
 
       const CHAKRAS = [
@@ -702,6 +974,16 @@
         "The blessing is not separate from my healing."
       ];
 
+      const GRATITUDE_LINES = [
+        "Thank you for the guidance already here.",
+        "Thank you for the door opening gently.",
+        "Thank you for the desire becoming devotion.",
+        "Thank you for what is healing in silence.",
+        "Thank you for the blessing I can carry well.",
+        "Thank you for the next right breath.",
+        "Thank you for the garden growing while I become ready."
+      ];
+      const GREEN_TEA_URL = "";
       const GARDEN_KEY = "manifestationGarden.v1";
       const GARDEN_LIMIT = 420;
       const PLANT_INTERVAL_MS = 72000;
@@ -725,9 +1007,15 @@
         frequency: CHAKRAS[0].frequency,
         volume: 0.52,
         audio: null,
+        audioEnabled: false,
+        gratitudeIndex: 0,
         panelCollapsed: mobileControls.matches,
         panelUserSet: false,
         panelGesture: null,
+        sidePanelCollapsed: {
+          gratitude: true,
+          breath: true
+        },
         garden: {
           plants: [],
           lastTick: performance.now(),
@@ -751,7 +1039,7 @@
         }
       };
 
-      const breathTotal = BREATH.reduce((sum, phase) => sum + phase.ms, 0);
+      let breathTotal = BREATH.reduce((sum, phase) => sum + phase.ms, 0);
 
       function resize() {
         state.dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -771,6 +1059,7 @@
           state.panelCollapsed = mobileControls.matches;
         }
         syncPanelUi();
+        syncSidePanels();
         if (!state.garden.bee.x || !state.garden.bee.y) {
           placeBee();
         }
@@ -806,8 +1095,69 @@
         syncPanelUi();
       }
 
+      function syncSidePanels() {
+        const panels = [
+          { name: "gratitude", panel: els.gratitudePanel, toggle: els.gratitudeToggle },
+          { name: "breath", panel: els.breathPanel, toggle: els.breathToggle }
+        ];
+
+        panels.forEach(({ name, panel, toggle }) => {
+          const collapsed = state.sidePanelCollapsed[name];
+          panel.dataset.collapsed = String(collapsed);
+          toggle.setAttribute("aria-expanded", String(!collapsed));
+          toggle.setAttribute("aria-label", collapsed ? `Expand ${name} controls` : `Minimize ${name} controls`);
+          toggle.title = collapsed ? `Expand ${name} controls` : `Minimize ${name} controls`;
+        });
+      }
+
+      function setSidePanelCollapsed(name, collapsed) {
+        if (!collapsed) {
+          Object.keys(state.sidePanelCollapsed).forEach((panelName) => {
+            state.sidePanelCollapsed[panelName] = panelName === name ? false : true;
+          });
+        } else {
+          state.sidePanelCollapsed[name] = true;
+        }
+        syncSidePanels();
+      }
+
       function formatFrequency(value) {
         return `${Math.round(value)} Hz`;
+      }
+
+      function formatSeconds(ms) {
+        const seconds = ms / 1000;
+        return `${Number.isInteger(seconds) ? seconds.toFixed(0) : seconds.toFixed(1)}s`;
+      }
+
+      function syncBreathControls() {
+        BREATH.forEach((phase, index) => {
+          els.breathRanges[index].value = phase.ms / 1000;
+          els.breathOutputs[index].textContent = formatSeconds(phase.ms);
+        });
+      }
+
+      function setBreathDuration(index, seconds) {
+        BREATH[index].ms = Math.round(Number(seconds) * 1000);
+        breathTotal = BREATH.reduce((sum, phase) => sum + phase.ms, 0);
+        state.activeBreath = -1;
+        state.breathStart = performance.now();
+        syncBreathControls();
+      }
+
+      function resetBreathDurations() {
+        DEFAULT_BREATH_MS.forEach((ms, index) => {
+          BREATH[index].ms = ms;
+        });
+        breathTotal = BREATH.reduce((sum, phase) => sum + phase.ms, 0);
+        state.activeBreath = -1;
+        state.breathStart = performance.now();
+        syncBreathControls();
+      }
+
+      function setGratitude(index) {
+        state.gratitudeIndex = (index + GRATITUDE_LINES.length) % GRATITUDE_LINES.length;
+        els.gratitudeLine.textContent = GRATITUDE_LINES[state.gratitudeIndex];
       }
 
       function buildChakraButtons() {
@@ -864,7 +1214,7 @@
         if (state.audio) {
           const now = state.audio.context.currentTime;
           state.audio.master.gain.cancelScheduledValues(now);
-          state.audio.master.gain.setTargetAtTime(state.volume, now, 0.4);
+          state.audio.master.gain.setTargetAtTime(state.audioEnabled ? state.volume : 0, now, 0.4);
         }
       }
 
@@ -911,6 +1261,29 @@
         els.volumeRange.addEventListener("input", () => {
           setVolume(els.volumeRange.value);
           startAudio();
+        });
+
+        els.breathRanges.forEach((range) => {
+          range.addEventListener("input", () => {
+            setBreathDuration(Number(range.dataset.breathIndex), Number(range.value));
+          });
+        });
+
+        els.breathReset.addEventListener("click", resetBreathDurations);
+
+        els.gratitudeNext.addEventListener("click", () => {
+          setGratitude(state.gratitudeIndex + 1);
+        });
+
+        els.gratitudePlant.addEventListener("click", () => {
+          setGratitude(state.gratitudeIndex + 1);
+          plantGratitude();
+        });
+
+        els.greenTeaLink.addEventListener("click", (event) => {
+          if (!GREEN_TEA_URL) {
+            event.preventDefault();
+          }
         });
       }
 
@@ -967,6 +1340,22 @@
             finishSwipe(touch.clientX, touch.clientY);
           }
         }, { passive: true });
+
+        const bindSidePanel = (name, panel, toggle) => {
+          toggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            setSidePanelCollapsed(name, !state.sidePanelCollapsed[name]);
+          });
+
+          panel.addEventListener("click", (event) => {
+            if (state.sidePanelCollapsed[name] && !event.target.closest(".panel-toggle")) {
+              setSidePanelCollapsed(name, false);
+            }
+          });
+        };
+
+        bindSidePanel("gratitude", els.gratitudePanel, els.gratitudeToggle);
+        bindSidePanel("breath", els.breathPanel, els.breathToggle);
 
         const followViewport = () => {
           if (!state.panelUserSet) {
@@ -1136,6 +1525,24 @@
         saveGarden();
       }
 
+      function plantGratitude() {
+        if (state.width === 0 || state.height === 0) {
+          return;
+        }
+
+        const now = Date.now();
+        for (let index = 0; index < 5; index += 1) {
+          const point = randomGardenPoint();
+          const plant = gardenPointToPlant(point, "flower", now - 7 * 60 * 1000 * Math.random());
+          state.garden.plants.push(plant);
+        }
+        if (state.garden.plants.length > GARDEN_LIMIT) {
+          state.garden.plants = state.garden.plants.slice(-GARDEN_LIMIT);
+        }
+        state.garden.bee.pollen = 1;
+        saveGarden();
+      }
+
       function chooseBeeTarget() {
         const now = Date.now();
         const plants = state.garden.plants.filter((plant) => {
@@ -1180,6 +1587,28 @@
               ? 900 + Math.random() * 1200
               : 2200 + Math.random() * 3200
         );
+      }
+
+      function startleBee(x, y, pointerType = "mouse") {
+        const bee = state.garden.bee;
+        if (!bee.x || !bee.y) {
+          return;
+        }
+
+        const distance = Math.hypot(bee.x - x, bee.y - y);
+        const startleRadius = pointerType === "touch" ? 76 : 48;
+        if (distance > startleRadius) {
+          return;
+        }
+
+        const angle = Math.atan2(bee.y - y, bee.x - x) + (Math.random() * 0.7 - 0.35);
+        const jump = pointerType === "touch" ? 230 : 180;
+        bee.targetX = clamp(bee.x + Math.cos(angle) * jump, 24, state.width - 24);
+        bee.targetY = clamp(bee.y + Math.sin(angle) * jump, 24, state.height - 24);
+        bee.action = "dart";
+        bee.actionUntil = performance.now() + 900 + Math.random() * 650;
+        bee.pollen = Math.max(bee.pollen, 0.86);
+        document.documentElement.dataset.bee = "startled";
       }
 
       function pollinateNearBee(now) {
@@ -1335,6 +1764,8 @@
 
       function drawBee(now) {
         const bee = state.garden.bee;
+        document.documentElement.dataset.beeX = String(Math.round(bee.x));
+        document.documentElement.dataset.beeY = String(Math.round(bee.y));
         const size = clamp(Math.min(state.width, state.height) / 650, 0.76, 1.22);
         const speed = Math.hypot(bee.vx, bee.vy);
         const angle = speed > 1 ? Math.atan2(bee.vy, bee.vx) : 0;
@@ -1557,6 +1988,52 @@
         }
       }
 
+      function syncAudioToggle() {
+        els.audioToggle.dataset.audio = state.audioEnabled ? "on" : "off";
+        els.audioToggle.setAttribute("aria-label", state.audioEnabled ? "Turn sound off" : "Turn sound on");
+        els.audioToggle.title = state.audioEnabled ? "Turn sound off" : "Turn sound on";
+      }
+
+      function setAudioEnabled(enabled) {
+        state.audioEnabled = enabled;
+        syncAudioToggle();
+
+        if (state.audioEnabled) {
+          startAudio();
+          return;
+        }
+
+        document.documentElement.dataset.audio = "off";
+        if (state.audio) {
+          const now = state.audio.context.currentTime;
+          state.audio.master.gain.cancelScheduledValues(now);
+          state.audio.master.gain.setTargetAtTime(0, now, 0.18);
+        }
+      }
+
+      function bindAudioToggle() {
+        let lastToggleAt = 0;
+        const toggle = (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const now = performance.now();
+          if (now - lastToggleAt < 340) {
+            return;
+          }
+          lastToggleAt = now;
+          setAudioEnabled(!state.audioEnabled);
+        };
+
+        els.audioToggle.addEventListener("pointerdown", toggle);
+        els.audioToggle.addEventListener("touchend", toggle);
+        els.audioToggle.addEventListener("click", toggle);
+        els.audioToggle.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            toggle(event);
+          }
+        });
+      }
+
       function startAudio() {
         if (state.audio) {
           awakenAudio();
@@ -1646,13 +2123,13 @@
           voices
         };
 
-        document.documentElement.dataset.audio = audio.state;
+        document.documentElement.dataset.audio = state.audioEnabled ? audio.state : "off";
         awakenAudio();
         document.addEventListener("visibilitychange", () => {
           const now = state.audio.context.currentTime;
           state.audio.master.gain.cancelScheduledValues(now);
           if (document.hidden) {
-            state.audio.master.gain.linearRampToValueAtTime(0.04, now + 1.6);
+            state.audio.master.gain.linearRampToValueAtTime(state.audioEnabled ? 0.04 : 0, now + 1.6);
           } else {
             awakenAudio();
           }
@@ -1668,20 +2145,46 @@
           const now = state.audio.context.currentTime;
           state.audio.master.gain.cancelScheduledValues(now);
           state.audio.master.gain.setValueAtTime(state.audio.master.gain.value, now);
-          state.audio.master.gain.linearRampToValueAtTime(state.volume, now + 4);
-          document.documentElement.dataset.audio = "on";
+          state.audio.master.gain.linearRampToValueAtTime(state.audioEnabled ? state.volume : 0, now + (state.audioEnabled ? 0.9 : 0.22));
+          document.documentElement.dataset.audio = state.audioEnabled ? "on" : "off";
         }).catch(() => {
           document.documentElement.dataset.audio = "blocked";
         });
       }
 
       function bindAudioUnlock() {
-        const unlock = () => startAudio();
+        const unlock = () => {
+          if (state.audioEnabled) {
+            startAudio();
+          }
+        };
         window.addEventListener("pointerdown", unlock, { passive: true, capture: true });
         window.addEventListener("touchstart", unlock, { passive: true, capture: true });
         window.addEventListener("touchend", unlock, { passive: true, capture: true });
         window.addEventListener("click", unlock, { passive: true, capture: true });
         window.addEventListener("keydown", unlock, { passive: true });
+      }
+
+      function bindBeeInteraction() {
+        let lastMouseStartle = 0;
+        const canStartle = (event) => !event.target.closest(".chakra-panel, .audio-toggle");
+
+        window.addEventListener("pointerdown", (event) => {
+          if (canStartle(event)) {
+            startleBee(event.clientX, event.clientY, event.pointerType);
+          }
+        }, { passive: true });
+
+        window.addEventListener("pointermove", (event) => {
+          if (event.pointerType !== "mouse" || !canStartle(event)) {
+            return;
+          }
+          const now = performance.now();
+          if (now - lastMouseStartle > 650) {
+            startleBee(event.clientX, event.clientY, "mouse");
+            lastMouseStartle = now;
+          }
+        }, { passive: true });
       }
 
       window.addEventListener("resize", resize, { passive: true });
@@ -1691,9 +2194,19 @@
       buildChakraButtons();
       bindControls();
       bindPanelControls();
+      bindAudioToggle();
       bindAudioUnlock();
+      bindBeeInteraction();
+      if (GREEN_TEA_URL) {
+        els.greenTeaLink.href = GREEN_TEA_URL;
+        els.greenTeaLink.removeAttribute("aria-disabled");
+        els.greenTeaLink.querySelector("span").textContent = "tip";
+      }
       setChakra(0);
       setVolume(52);
+      syncAudioToggle();
+      syncBreathControls();
+      setGratitude(0);
       resize();
       seedGarden();
       setPrayer(0);
