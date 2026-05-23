@@ -1,0 +1,1465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manifestation Meditation</title>
+  <style>
+    :root {
+      --ink: #050807;
+      --mist: #fff7dd;
+      --gold: #f0c56b;
+      --aqua: #8edfcf;
+      --rose: #e4a08f;
+      --chakra-hue: 0;
+      --phase-hue: 42;
+      --breath-scale: 0.78;
+      --breath-progress: 0deg;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--ink);
+    }
+
+    body {
+      overflow: hidden;
+      color: var(--mist);
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      letter-spacing: 0;
+    }
+
+    .scene {
+      position: relative;
+      min-height: 100svh;
+      overflow: hidden;
+      isolation: isolate;
+      background:
+        linear-gradient(140deg, rgba(7, 17, 14, 0.96), rgba(20, 69, 58, 0.9) 35%, rgba(88, 54, 66, 0.82) 68%, rgba(177, 116, 66, 0.86)),
+        linear-gradient(35deg, #050807, #14382f 46%, #e0b767 142%);
+      background-size: 170% 170%, 210% 210%;
+      animation: fieldDrift 58s ease-in-out infinite alternate;
+    }
+
+    .scene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(5, 8, 7, 0.42), transparent 22%, transparent 78%, rgba(5, 8, 7, 0.34)),
+        linear-gradient(180deg, rgba(255, 247, 221, 0.09), transparent 42%, rgba(5, 8, 7, 0.46));
+    }
+
+    #geometry,
+    #garden {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #geometry {
+      z-index: 2;
+      opacity: 0.9;
+      mix-blend-mode: screen;
+    }
+
+    #garden {
+      z-index: 5;
+      opacity: 0.92;
+    }
+
+    .colour-tide,
+    .axis-light,
+    .soft-rays {
+      position: fixed;
+      pointer-events: none;
+    }
+
+    .colour-tide {
+      inset: -18vmax;
+      z-index: 1;
+      opacity: 0.44;
+      background:
+        conic-gradient(
+          from 0deg at 50% 48%,
+          rgba(10, 28, 24, 0.94) 0deg,
+          rgba(32, 102, 83, 0.9) 60deg,
+          rgba(84, 73, 140, 0.74) 126deg,
+          rgba(190, 78, 98, 0.68) 186deg,
+          rgba(223, 157, 67, 0.84) 248deg,
+          rgba(124, 195, 169, 0.78) 310deg,
+          rgba(10, 28, 24, 0.94) 360deg
+        );
+      filter: blur(34px) saturate(1.35);
+      mix-blend-mode: screen;
+      transform-origin: center;
+      animation: tideTurn 46s ease-in-out infinite alternate;
+    }
+
+    .axis-light {
+      top: 5%;
+      bottom: 6%;
+      left: 50%;
+      z-index: 3;
+      width: min(38rem, 70vw);
+      translate: -50% 0;
+      opacity: 0.66;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(255, 247, 221, 0.34), rgba(240, 197, 107, 0.15) 22%, rgba(142, 223, 207, 0.08) 40%, rgba(255, 247, 221, 0) 66%),
+        linear-gradient(90deg, transparent, rgba(255, 247, 221, 0.13) 49%, rgba(255, 247, 221, 0.13) 51%, transparent);
+      filter: blur(10px);
+      mix-blend-mode: screen;
+      animation: axisBreathe 12s ease-in-out infinite;
+    }
+
+    .soft-rays {
+      inset: -18vmin;
+      z-index: 3;
+      opacity: 0.18;
+      background:
+        repeating-linear-gradient(
+          118deg,
+          rgba(255, 247, 221, 0) 0,
+          rgba(255, 247, 221, 0) 5.8rem,
+          rgba(255, 247, 221, 0.1) 6.15rem,
+          rgba(255, 247, 221, 0) 6.75rem
+        );
+      transform: rotate(-4deg);
+      animation: rayDrift 30s ease-in-out infinite alternate;
+    }
+
+    .prayer,
+    .focus {
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    .prayer {
+      position: fixed;
+      top: clamp(1.2rem, 6svh, 3.5rem);
+      left: 50%;
+      z-index: 7;
+      width: min(62rem, calc(100vw - 3rem));
+      translate: -50% 0;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--mist);
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      font-size: 5.1rem;
+      line-height: 0.98;
+      font-weight: 500;
+      text-wrap: balance;
+      text-shadow:
+        0 0 1rem rgba(240, 197, 107, 0.36),
+        0 1.2rem 4rem rgba(5, 8, 7, 0.66);
+      transition: opacity 1.1s ease, transform 1.1s ease, font-size 250ms ease;
+    }
+
+    .prayer.compact h1 {
+      font-size: 4.25rem;
+      line-height: 1;
+    }
+
+    .prayer.fade-out h1 {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+
+    .focus {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      z-index: 8;
+      width: min(16.5rem, 38vmin);
+      aspect-ratio: 1;
+      translate: -50% -50%;
+      display: grid;
+      place-items: center;
+      color: rgba(255, 247, 221, 0.9);
+      pointer-events: none;
+    }
+
+    .focus::before,
+    .focus::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .focus::before {
+      inset: -6%;
+      opacity: 0.64;
+      background:
+        conic-gradient(
+          from -90deg,
+          hsla(var(--chakra-hue), 88%, 66%, 0.68) 0deg 106deg,
+          rgba(255, 247, 221, 0.28) 106deg 158deg,
+          hsla(var(--chakra-hue), 72%, 76%, 0.44) 158deg 306deg,
+          rgba(228, 160, 143, 0.34) 306deg 360deg
+        );
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      filter: drop-shadow(0 0 0.85rem hsla(var(--phase-hue), 88%, 68%, 0.42));
+      animation: ringTurn 42s linear infinite;
+    }
+
+    .focus::after {
+      inset: -12%;
+      opacity: 0.94;
+      background:
+        conic-gradient(
+          from -90deg,
+          hsla(var(--phase-hue), 90%, 72%, 0.94) 0deg,
+          hsla(var(--phase-hue), 90%, 72%, 0.94) var(--breath-progress),
+          rgba(255, 247, 221, 0.1) var(--breath-progress),
+          rgba(255, 247, 221, 0.1) 360deg
+        );
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 2px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 2px));
+      filter: drop-shadow(0 0 1rem hsla(var(--phase-hue), 88%, 70%, 0.55));
+      transition: background 250ms linear, filter 700ms ease;
+    }
+
+    .focus-halo,
+    .focus-orbit,
+    .focus-pulse {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .focus-halo {
+      inset: 0;
+      border: 1px solid rgba(255, 247, 221, 0.22);
+      box-shadow:
+        0 0 3.4rem rgba(240, 197, 107, 0.2),
+        inset 0 0 2.6rem rgba(142, 223, 207, 0.12);
+    }
+
+    .focus-orbit {
+      inset: 10%;
+      border: 1px dashed rgba(255, 247, 221, 0.25);
+      animation: ringTurn 32s linear infinite reverse;
+    }
+
+    .focus-pulse {
+      inset: 21%;
+      opacity: 0.92;
+      background:
+        radial-gradient(circle, rgba(255, 247, 221, 0.42), hsla(var(--chakra-hue), 84%, 66%, 0.3) 38%, hsla(var(--phase-hue), 72%, 72%, 0.12) 62%, transparent 72%);
+      filter: blur(1px);
+      transform: scale(var(--breath-scale));
+      transition: transform 650ms ease, background 900ms ease;
+    }
+
+    .focus-text {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      justify-items: center;
+      gap: 0.24rem;
+      text-align: center;
+      text-shadow: 0 0 1.3rem rgba(5, 8, 7, 0.74);
+    }
+
+    .phase {
+      color: hsla(var(--phase-hue), 88%, 76%, 0.98);
+      font-size: 0.92rem;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .count {
+      margin-top: 0.1rem;
+      color: rgba(255, 247, 221, 0.84);
+      font-size: 1.08rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .chakra-panel {
+      position: fixed;
+      left: 1rem;
+      bottom: 1rem;
+      z-index: 10;
+      width: min(21rem, calc(100vw - 2rem));
+      padding: 0.8rem;
+      border: 1px solid rgba(255, 247, 221, 0.16);
+      border-radius: 8px;
+      color: rgba(255, 247, 221, 0.9);
+      background: rgba(5, 8, 7, 0.58);
+      box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.28), inset 0 0 2rem rgba(255, 247, 221, 0.04);
+      backdrop-filter: blur(14px);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    .chakra-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .chakra-name {
+      display: block;
+      margin-top: 0.1rem;
+      color: hsl(var(--chakra-hue), 88%, 74%);
+      font-size: 1rem;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .chakra-frequency {
+      min-width: 4.7rem;
+      color: rgba(255, 247, 221, 0.82);
+      font-size: 0.9rem;
+      line-height: 1.3;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chakra-buttons {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.36rem;
+      margin-bottom: 0.72rem;
+    }
+
+    .chakra-button {
+      width: 100%;
+      aspect-ratio: 1;
+      border: 1px solid rgba(255, 247, 221, 0.2);
+      border-radius: 50%;
+      background: hsl(var(--swatch-hue), 84%, 58%);
+      box-shadow: 0 0 1rem hsla(var(--swatch-hue), 86%, 62%, 0.2);
+      cursor: pointer;
+    }
+
+    .chakra-button[aria-pressed="true"] {
+      border-color: rgba(255, 247, 221, 0.86);
+      box-shadow:
+        0 0 0 2px rgba(5, 8, 7, 0.72),
+        0 0 1.2rem hsla(var(--swatch-hue), 88%, 70%, 0.72);
+    }
+
+    .chakra-row {
+      display: grid;
+      gap: 0.34rem;
+      margin-top: 0.56rem;
+    }
+
+    .control-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+
+    .auto-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      color: rgba(255, 247, 221, 0.78);
+      font-size: 0.82rem;
+      line-height: 1.2;
+    }
+
+    .auto-label input {
+      inline-size: 1.15rem;
+      block-size: 1.15rem;
+      accent-color: hsl(var(--chakra-hue), 88%, 62%);
+    }
+
+    .range-field {
+      display: grid;
+      gap: 0.32rem;
+    }
+
+    .range-field input[type="range"] {
+      width: 100%;
+      accent-color: hsl(var(--chakra-hue), 88%, 62%);
+    }
+
+    .range-value {
+      color: rgba(255, 247, 221, 0.76);
+      font-size: 0.76rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @keyframes fieldDrift {
+      0% {
+        background-position: 0% 52%, 48% 22%;
+      }
+      35% {
+        background-position: 66% 38%, 24% 78%;
+      }
+      72% {
+        background-position: 36% 84%, 88% 44%;
+      }
+      100% {
+        background-position: 100% 48%, 42% 16%;
+      }
+    }
+
+    @keyframes tideTurn {
+      0% {
+        opacity: 0.36;
+        transform: rotate(0deg) scale(1);
+      }
+      42% {
+        opacity: 0.58;
+        transform: rotate(36deg) scale(1.08);
+      }
+      100% {
+        opacity: 0.5;
+        transform: rotate(-28deg) scale(1.12);
+      }
+    }
+
+    @keyframes axisBreathe {
+      0%,
+      100% {
+        opacity: 0.46;
+        transform: scaleY(0.94);
+      }
+      50% {
+        opacity: 0.76;
+        transform: scaleY(1.04);
+      }
+    }
+
+    @keyframes rayDrift {
+      from {
+        translate: -1.8rem -0.8rem;
+      }
+      to {
+        translate: 1.6rem 1.1rem;
+      }
+    }
+
+    @keyframes ringTurn {
+      from {
+        rotate: 0deg;
+      }
+      to {
+        rotate: 360deg;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .prayer {
+        top: 2rem;
+        width: min(28rem, calc(100vw - 2rem));
+      }
+
+      h1,
+      .prayer.compact h1 {
+        font-size: 3.1rem;
+        line-height: 1;
+      }
+
+      .focus {
+        width: min(12.8rem, 54vmin);
+      }
+
+      .chakra-panel {
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: 0.75rem;
+        width: auto;
+        padding: 0.68rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="scene" aria-label="A quiet manifestation meditation page">
+    <canvas id="geometry" aria-hidden="true"></canvas>
+    <canvas id="garden" aria-hidden="true"></canvas>
+    <div class="colour-tide" aria-hidden="true"></div>
+    <div class="axis-light" aria-hidden="true"></div>
+    <div class="soft-rays" aria-hidden="true"></div>
+
+    <section class="prayer" id="prayer" aria-live="polite">
+      <h1 id="prayerLine">God is here.</h1>
+    </section>
+
+    <section class="focus" aria-hidden="true">
+      <div class="focus-halo"></div>
+      <div class="focus-orbit"></div>
+      <div class="focus-pulse"></div>
+      <div class="focus-text">
+        <span class="phase" id="phaseText">inhale</span>
+        <span class="count" id="phaseCount">4</span>
+      </div>
+    </section>
+
+    <aside class="chakra-panel" aria-label="Chakra frequency controls">
+      <div class="chakra-head">
+        <div>
+          <strong class="chakra-name" id="chakraName">Root</strong>
+        </div>
+        <output class="chakra-frequency" id="chakraFrequency">396 Hz</output>
+      </div>
+
+      <div class="chakra-buttons" id="chakraButtons" role="group" aria-label="Choose chakra"></div>
+
+      <label class="auto-label">
+        <span>Auto</span>
+        <input id="autoChakra" type="checkbox" checked>
+      </label>
+
+      <label class="chakra-row range-field">
+        <span class="control-line">
+          <output class="range-value" id="frequencyValue">396 Hz</output>
+        </span>
+        <input id="frequencyRange" type="range" min="174" max="963" step="1" value="396" aria-label="Frequency">
+      </label>
+
+      <label class="chakra-row range-field">
+        <span class="control-line">
+          <output class="range-value" id="volumeValue">52%</output>
+        </span>
+        <input id="volumeRange" type="range" min="0" max="80" step="1" value="52" aria-label="Volume">
+      </label>
+    </aside>
+  </main>
+
+  <script>
+    (() => {
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const canvas = document.getElementById("geometry");
+      const ctx = canvas.getContext("2d", { alpha: true });
+      const gardenCanvas = document.getElementById("garden");
+      const gardenCtx = gardenCanvas.getContext("2d", { alpha: true });
+
+      const els = {
+        prayer: document.getElementById("prayer"),
+        line: document.getElementById("prayerLine"),
+        phase: document.getElementById("phaseText"),
+        count: document.getElementById("phaseCount"),
+        chakraName: document.getElementById("chakraName"),
+        chakraFrequency: document.getElementById("chakraFrequency"),
+        chakraButtons: document.getElementById("chakraButtons"),
+        autoChakra: document.getElementById("autoChakra"),
+        frequencyRange: document.getElementById("frequencyRange"),
+        frequencyValue: document.getElementById("frequencyValue"),
+        volumeRange: document.getElementById("volumeRange"),
+        volumeValue: document.getElementById("volumeValue")
+      };
+
+      const BREATH = [
+        { name: "inhale", ms: 4200, scale: 1.12, hue: 42 },
+        { name: "hold", ms: 2000, scale: 1.12, hue: 50 },
+        { name: "release", ms: 5600, scale: 0.72, hue: 168 },
+        { name: "rest", ms: 2200, scale: 0.78, hue: 326 }
+      ];
+
+      const CHAKRAS = [
+        { name: "Root", frequency: 396, hue: 2 },
+        { name: "Sacral", frequency: 417, hue: 28 },
+        { name: "Solar", frequency: 528, hue: 48 },
+        { name: "Heart", frequency: 639, hue: 132 },
+        { name: "Throat", frequency: 741, hue: 204 },
+        { name: "Third Eye", frequency: 852, hue: 252 },
+        { name: "Crown", frequency: 963, hue: 286 }
+      ];
+
+      const PRAYERS = [
+        "God is here.",
+        "I remember who I am.",
+        "My desires are purified in love.",
+        "What is meant for me knows its way.",
+        "I receive with a clean heart.",
+        "I am not chasing. I am aligning.",
+        "God meets me in the quiet.",
+        "My heart is being ordered.",
+        "I let grace do what force cannot.",
+        "I am becoming spacious enough to receive.",
+        "The life I seek begins inside me.",
+        "I choose the highest desire.",
+        "God is nearer than fear.",
+        "My attention is sacred.",
+        "I am held while I change.",
+        "Blessing can arrive gently.",
+        "I am worthy of the good I ask for.",
+        "My desire becomes devotion.",
+        "The unseen is working with me.",
+        "I breathe as the person I am becoming.",
+        "I release every counterfeit path.",
+        "I am allowed to be transformed.",
+        "The answer can be simple.",
+        "My spirit knows the way home.",
+        "Faith is my posture.",
+        "I receive, then I become responsible.",
+        "God, make me ready.",
+        "I am connected.",
+        "The blessing is not separate from my healing."
+      ];
+
+      const GARDEN_KEY = "manifestationGarden.v1";
+      const GARDEN_LIMIT = 420;
+      const PLANT_INTERVAL_MS = 72000;
+      const PLANT_KINDS = [
+        { kind: "flower", matureMs: 38 * 60 * 1000, weight: 5 },
+        { kind: "tree", matureMs: 150 * 60 * 1000, weight: 1 }
+      ];
+
+      const state = {
+        width: 0,
+        height: 0,
+        dpr: 1,
+        prayerIndex: 0,
+        activeBreath: -1,
+        breathStart: performance.now(),
+        chakraIndex: 0,
+        chakraAuto: true,
+        chakraLastAdvance: performance.now(),
+        chakraAutoMs: 32000,
+        frequency: CHAKRAS[0].frequency,
+        volume: 0.52,
+        audio: null,
+        garden: {
+          plants: [],
+          lastTick: performance.now(),
+          lastSave: 0,
+          plantCount: 0,
+          monk: {
+            x: 0,
+            y: 0,
+            targetX: 0,
+            targetY: 0,
+            direction: 1,
+            nextPlantAt: performance.now() + 7400,
+            stepSeed: Math.random() * Math.PI * 2
+          }
+        }
+      };
+
+      const breathTotal = BREATH.reduce((sum, phase) => sum + phase.ms, 0);
+
+      function resize() {
+        state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+        state.width = window.innerWidth;
+        state.height = window.innerHeight;
+        canvas.width = Math.floor(state.width * state.dpr);
+        canvas.height = Math.floor(state.height * state.dpr);
+        canvas.style.width = `${state.width}px`;
+        canvas.style.height = `${state.height}px`;
+        ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+        gardenCanvas.width = Math.floor(state.width * state.dpr);
+        gardenCanvas.height = Math.floor(state.height * state.dpr);
+        gardenCanvas.style.width = `${state.width}px`;
+        gardenCanvas.style.height = `${state.height}px`;
+        gardenCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+        if (!state.garden.monk.x || !state.garden.monk.y) {
+          placeMonk();
+        }
+        window.setTimeout(fitPrayer, 0);
+      }
+
+      function fitPrayer() {
+        els.prayer.classList.remove("compact");
+        const textBox = els.prayer.getBoundingClientRect();
+        const focusBox = document.querySelector(".focus").getBoundingClientRect();
+        if (textBox.bottom > focusBox.top - 24) {
+          els.prayer.classList.add("compact");
+        }
+      }
+
+      function setPrayer(index) {
+        els.line.textContent = PRAYERS[index];
+        fitPrayer();
+      }
+
+      function formatFrequency(value) {
+        return `${Math.round(value)} Hz`;
+      }
+
+      function buildChakraButtons() {
+        CHAKRAS.forEach((chakra, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "chakra-button";
+          button.dataset.index = index;
+          button.style.setProperty("--swatch-hue", chakra.hue);
+          button.setAttribute("aria-label", `${chakra.name} chakra, ${chakra.frequency} Hz`);
+          button.setAttribute("aria-pressed", index === state.chakraIndex ? "true" : "false");
+          button.title = `${chakra.name} - ${chakra.frequency} Hz`;
+          els.chakraButtons.appendChild(button);
+        });
+      }
+
+      function syncChakraUi() {
+        const chakra = CHAKRAS[state.chakraIndex];
+        document.documentElement.style.setProperty("--chakra-hue", chakra.hue);
+        els.chakraName.textContent = chakra.name;
+        els.chakraFrequency.textContent = formatFrequency(state.frequency);
+        els.frequencyValue.textContent = formatFrequency(state.frequency);
+        els.frequencyRange.value = Math.round(state.frequency);
+        els.volumeValue.textContent = `${Math.round(state.volume * 100)}%`;
+        els.volumeRange.value = Math.round(state.volume * 100);
+
+        els.chakraButtons.querySelectorAll(".chakra-button").forEach((button) => {
+          button.setAttribute("aria-pressed", Number(button.dataset.index) === state.chakraIndex ? "true" : "false");
+        });
+      }
+
+      function retuneAudio() {
+        if (!state.audio) {
+          return;
+        }
+
+        const now = state.audio.context.currentTime;
+        state.audio.voices.forEach((voice) => {
+          voice.osc.frequency.setTargetAtTime(state.frequency * voice.ratio, now, 0.45);
+        });
+        state.audio.noiseFilter.frequency.setTargetAtTime(state.frequency, now, 0.45);
+        state.audio.lowpass.frequency.setTargetAtTime(Math.max(840, Math.min(2600, state.frequency * 2.8)), now, 0.7);
+      }
+
+      function setFrequency(value) {
+        state.frequency = Math.max(174, Math.min(963, Math.round(Number(value))));
+        syncChakraUi();
+        retuneAudio();
+      }
+
+      function setVolume(value) {
+        state.volume = Math.max(0, Math.min(0.8, Number(value) / 100));
+        syncChakraUi();
+        if (state.audio) {
+          const now = state.audio.context.currentTime;
+          state.audio.master.gain.cancelScheduledValues(now);
+          state.audio.master.gain.setTargetAtTime(state.volume, now, 0.4);
+        }
+      }
+
+      function setChakra(index, options = {}) {
+        const nextIndex = (index + CHAKRAS.length) % CHAKRAS.length;
+        state.chakraIndex = nextIndex;
+        state.frequency = CHAKRAS[nextIndex].frequency;
+        state.chakraLastAdvance = options.now || performance.now();
+        syncChakraUi();
+        retuneAudio();
+      }
+
+      function updateChakraAuto(now) {
+        if (!state.chakraAuto) {
+          return;
+        }
+
+        if (now - state.chakraLastAdvance >= state.chakraAutoMs) {
+          setChakra(state.chakraIndex + 1, { now });
+        }
+      }
+
+      function bindControls() {
+        els.chakraButtons.addEventListener("click", (event) => {
+          const button = event.target.closest(".chakra-button");
+          if (!button) {
+            return;
+          }
+          setChakra(Number(button.dataset.index));
+          startAudio();
+        });
+
+        els.autoChakra.addEventListener("change", () => {
+          state.chakraAuto = els.autoChakra.checked;
+          state.chakraLastAdvance = performance.now();
+          startAudio();
+        });
+
+        els.frequencyRange.addEventListener("input", () => {
+          setFrequency(els.frequencyRange.value);
+          startAudio();
+        });
+
+        els.volumeRange.addEventListener("input", () => {
+          setVolume(els.volumeRange.value);
+          startAudio();
+        });
+      }
+
+      function cyclePrayer() {
+        state.prayerIndex = (state.prayerIndex + 1) % PRAYERS.length;
+        els.prayer.classList.add("fade-out");
+        window.setTimeout(() => {
+          setPrayer(state.prayerIndex);
+          els.prayer.classList.remove("fade-out");
+        }, 1100);
+      }
+
+      function currentBreath(now) {
+        let position = (now - state.breathStart) % breathTotal;
+        for (let index = 0; index < BREATH.length; index += 1) {
+          const phase = BREATH[index];
+          if (position < phase.ms) {
+            return { index, phase, elapsed: position };
+          }
+          position -= phase.ms;
+        }
+        return { index: 0, phase: BREATH[0], elapsed: 0 };
+      }
+
+      function updateBreath(now) {
+        const current = currentBreath(now);
+        const progress = current.elapsed / current.phase.ms;
+        const remaining = Math.max(1, Math.ceil((current.phase.ms - current.elapsed) / 1000));
+
+        document.documentElement.style.setProperty("--breath-progress", `${progress * 360}deg`);
+        els.count.textContent = remaining;
+
+        if (current.index !== state.activeBreath) {
+          state.activeBreath = current.index;
+          els.phase.textContent = current.phase.name;
+          document.documentElement.style.setProperty("--breath-scale", current.phase.scale);
+          document.documentElement.style.setProperty("--phase-hue", current.phase.hue);
+        }
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function smoothStep(value) {
+        const t = clamp(value, 0, 1);
+        return t * t * (3 - 2 * t);
+      }
+
+      function gardenPointToPlant(point, kind, plantedAt) {
+        const matureMs = PLANT_KINDS.find((plantKind) => plantKind.kind === kind).matureMs;
+        const flowerHues = [326, 24, 46, 196, 286, 156];
+        const hue = kind === "tree"
+          ? 104 + Math.random() * 54
+          : flowerHues[Math.floor(Math.random() * flowerHues.length)] + Math.random() * 10 - 5;
+
+        return {
+          kind,
+          nx: clamp(point.x / state.width, 0.02, 0.98),
+          ny: clamp(point.y / state.height, 0.02, 0.98),
+          plantedAt,
+          matureMs,
+          hue,
+          size: 0.78 + Math.random() * 0.72,
+          seed: Math.random() * 1000
+        };
+      }
+
+      function randomGardenPoint() {
+        const margin = 28;
+        const centerX = state.width / 2;
+        const centerY = state.height / 2;
+        const focusClear = Math.min(state.width, state.height) * 0.22;
+        const prayerClear = Math.min(state.height * 0.24, 220);
+        const panelWidth = Math.min(360, state.width * 0.62);
+        const panelHeight = Math.min(230, state.height * 0.36);
+
+        for (let attempt = 0; attempt < 48; attempt += 1) {
+          const x = margin + Math.random() * Math.max(1, state.width - margin * 2);
+          const y = margin + Math.random() * Math.max(1, state.height - margin * 2);
+          const dx = x - centerX;
+          const dy = y - centerY;
+          const inFocus = Math.hypot(dx, dy) < focusClear;
+          const inPrayer = y < prayerClear && Math.abs(dx) < state.width * 0.42;
+          const inPanel = x < panelWidth && y > state.height - panelHeight;
+
+          if (!inFocus && !inPrayer && !inPanel) {
+            return { x, y };
+          }
+        }
+
+        return {
+          x: centerX + (Math.random() > 0.5 ? 1 : -1) * (focusClear + Math.random() * 120),
+          y: centerY + (Math.random() > 0.5 ? 1 : -1) * (focusClear + Math.random() * 120)
+        };
+      }
+
+      function choosePlantKind() {
+        state.garden.plantCount += 1;
+        if (state.garden.plantCount % 7 === 0) {
+          return "tree";
+        }
+
+        const totalWeight = PLANT_KINDS.reduce((sum, plantKind) => sum + plantKind.weight, 0);
+        let draw = Math.random() * totalWeight;
+        for (const plantKind of PLANT_KINDS) {
+          draw -= plantKind.weight;
+          if (draw <= 0) {
+            return plantKind.kind;
+          }
+        }
+        return "flower";
+      }
+
+      function saveGarden() {
+        try {
+          const plants = state.garden.plants.slice(-GARDEN_LIMIT);
+          window.localStorage.setItem(GARDEN_KEY, JSON.stringify({ plants }));
+          state.garden.plants = plants;
+          state.garden.lastSave = performance.now();
+        } catch (error) {
+          state.garden.lastSave = performance.now();
+        }
+      }
+
+      function loadGarden() {
+        try {
+          const saved = JSON.parse(window.localStorage.getItem(GARDEN_KEY) || "{}");
+          if (Array.isArray(saved.plants)) {
+            state.garden.plants = saved.plants
+              .filter((plant) => Number.isFinite(plant.nx) && Number.isFinite(plant.ny) && plant.plantedAt)
+              .slice(-GARDEN_LIMIT);
+            state.garden.plantCount = state.garden.plants.length;
+          }
+        } catch (error) {
+          state.garden.plants = [];
+        }
+      }
+
+      function seedGarden() {
+        if (state.garden.plants.length > 0 || state.width === 0 || state.height === 0) {
+          return;
+        }
+
+        const now = Date.now();
+        for (let index = 0; index < 14; index += 1) {
+          const kind = index % 6 === 0 ? "tree" : "flower";
+          const point = randomGardenPoint();
+          const matureMs = PLANT_KINDS.find((plantKind) => plantKind.kind === kind).matureMs;
+          const age = kind === "tree"
+            ? matureMs * (0.16 + Math.random() * 0.32)
+            : matureMs * (0.54 + Math.random() * 0.44);
+          state.garden.plants.push(gardenPointToPlant(point, kind, now - age));
+        }
+        state.garden.plantCount = state.garden.plants.length;
+        saveGarden();
+      }
+
+      function placeMonk() {
+        const point = randomGardenPoint();
+        const target = randomGardenPoint();
+        const monk = state.garden.monk;
+        monk.x = point.x;
+        monk.y = point.y;
+        monk.targetX = target.x;
+        monk.targetY = target.y;
+      }
+
+      function setMonkTarget() {
+        const target = randomGardenPoint();
+        state.garden.monk.targetX = target.x;
+        state.garden.monk.targetY = target.y;
+      }
+
+      function plantNearMonk(now) {
+        const monk = state.garden.monk;
+        let point = {
+          x: clamp(monk.x + (Math.random() * 30 - 15), 24, state.width - 24),
+          y: clamp(monk.y + (Math.random() * 26 - 13), 24, state.height - 24)
+        };
+        const centerDistance = Math.hypot(point.x - state.width / 2, point.y - state.height / 2);
+        if (centerDistance < Math.min(state.width, state.height) * 0.24) {
+          point = randomGardenPoint();
+        }
+        state.garden.plants.push(gardenPointToPlant(point, choosePlantKind(), Date.now()));
+        if (state.garden.plants.length > GARDEN_LIMIT) {
+          state.garden.plants = state.garden.plants.slice(-GARDEN_LIMIT);
+        }
+        state.garden.monk.nextPlantAt = now + PLANT_INTERVAL_MS * (0.74 + Math.random() * 0.68);
+        saveGarden();
+      }
+
+      function updateGarden(now) {
+        const garden = state.garden;
+        const monk = garden.monk;
+        const dt = Math.min(0.09, Math.max(0, (now - garden.lastTick) / 1000));
+        garden.lastTick = now;
+
+        if (!reducedMotion) {
+          const dx = monk.targetX - monk.x;
+          const dy = monk.targetY - monk.y;
+          const distance = Math.hypot(dx, dy);
+          const speed = 12 + Math.sin(now * 0.00064 + monk.stepSeed) * 3.5;
+
+          if (distance < 10) {
+            setMonkTarget();
+          } else {
+            monk.x += dx / distance * speed * dt;
+            monk.y += dy / distance * speed * dt;
+            monk.direction = dx < 0 ? -1 : 1;
+
+            const centerX = state.width / 2;
+            const centerY = state.height / 2;
+            const focusClear = Math.min(state.width, state.height) * 0.24;
+            const centerDistance = Math.hypot(monk.x - centerX, monk.y - centerY);
+            if (centerDistance < focusClear) {
+              const angle = Math.atan2(monk.y - centerY, monk.x - centerX);
+              monk.x = centerX + Math.cos(angle) * focusClear;
+              monk.y = centerY + Math.sin(angle) * focusClear;
+              setMonkTarget();
+            }
+          }
+
+          if (now >= monk.nextPlantAt) {
+            plantNearMonk(now);
+          }
+        }
+
+        if (now - garden.lastSave > 18000) {
+          saveGarden();
+        }
+      }
+
+      function drawFlowerPlant(plant, x, y, maturity, now) {
+        const breeze = Math.sin(now * 0.001 + plant.seed) * (1.4 + maturity * 2.2);
+        const stem = (10 + plant.size * 22) * maturity;
+        const bloom = (3.2 + plant.size * 7.4) * maturity;
+        const leaf = (2.8 + plant.size * 4.2) * maturity;
+
+        gardenCtx.save();
+        gardenCtx.translate(x, y);
+        gardenCtx.globalAlpha = 0.3 + maturity * 0.68;
+        gardenCtx.strokeStyle = `hsla(${116 + plant.hue * 0.06}, 54%, 62%, 0.62)`;
+        gardenCtx.lineWidth = Math.max(0.7, plant.size * 1.1);
+        gardenCtx.beginPath();
+        gardenCtx.moveTo(0, 0);
+        gardenCtx.quadraticCurveTo(breeze * 0.32, -stem * 0.5, breeze, -stem);
+        gardenCtx.stroke();
+
+        gardenCtx.fillStyle = `hsla(${132 + plant.hue * 0.04}, 56%, 58%, 0.44)`;
+        gardenCtx.beginPath();
+        gardenCtx.ellipse(-leaf * 0.8, -stem * 0.45, leaf, leaf * 0.38, -0.7, 0, Math.PI * 2);
+        gardenCtx.ellipse(leaf * 0.9, -stem * 0.62, leaf * 0.88, leaf * 0.34, 0.62, 0, Math.PI * 2);
+        gardenCtx.fill();
+
+        gardenCtx.translate(breeze, -stem);
+        for (let petal = 0; petal < 6; petal += 1) {
+          const angle = petal * Math.PI * 2 / 6 + plant.seed;
+          gardenCtx.fillStyle = `hsla(${plant.hue}, 78%, ${64 + petal * 2}%, ${0.48 + maturity * 0.4})`;
+          gardenCtx.beginPath();
+          gardenCtx.ellipse(Math.cos(angle) * bloom * 0.72, Math.sin(angle) * bloom * 0.72, bloom * 0.58, bloom * 0.28, angle, 0, Math.PI * 2);
+          gardenCtx.fill();
+        }
+        gardenCtx.fillStyle = "rgba(255, 239, 163, 0.78)";
+        gardenCtx.beginPath();
+        gardenCtx.arc(0, 0, Math.max(0.8, bloom * 0.34), 0, Math.PI * 2);
+        gardenCtx.fill();
+        gardenCtx.restore();
+      }
+
+      function drawTreePlant(plant, x, y, maturity, now) {
+        const sway = Math.sin(now * 0.00078 + plant.seed) * (2 + maturity * 3.4);
+        const height = (20 + plant.size * 44) * maturity;
+        const canopy = (10 + plant.size * 24) * maturity;
+
+        gardenCtx.save();
+        gardenCtx.translate(x, y);
+        gardenCtx.globalAlpha = 0.28 + maturity * 0.64;
+        gardenCtx.strokeStyle = `hsla(${28 + plant.hue * 0.08}, 52%, 40%, 0.64)`;
+        gardenCtx.lineWidth = Math.max(1.1, plant.size * 2.2 * maturity);
+        gardenCtx.beginPath();
+        gardenCtx.moveTo(0, 0);
+        gardenCtx.quadraticCurveTo(sway * 0.16, -height * 0.46, sway, -height);
+        gardenCtx.stroke();
+
+        gardenCtx.strokeStyle = `hsla(${32 + plant.hue * 0.05}, 48%, 48%, 0.42)`;
+        for (let branch = -1; branch <= 1; branch += 2) {
+          gardenCtx.beginPath();
+          gardenCtx.moveTo(sway * 0.42, -height * 0.58);
+          gardenCtx.quadraticCurveTo(branch * canopy * 0.45, -height * 0.72, branch * canopy * 0.92, -height * 0.88);
+          gardenCtx.stroke();
+        }
+
+        const topY = -height;
+        const canopyHues = [plant.hue, plant.hue + 16, plant.hue - 18];
+        canopyHues.forEach((hue, index) => {
+          gardenCtx.fillStyle = `hsla(${hue}, 58%, ${45 + index * 6}%, ${0.36 + maturity * 0.34})`;
+          gardenCtx.beginPath();
+          gardenCtx.arc(sway + (index - 1) * canopy * 0.42, topY + index * canopy * 0.18, canopy * (0.72 + index * 0.1), 0, Math.PI * 2);
+          gardenCtx.fill();
+        });
+        gardenCtx.restore();
+      }
+
+      function drawMonk(now) {
+        const monk = state.garden.monk;
+        const size = clamp(Math.min(state.width, state.height) / 690, 0.82, 1.18);
+        const step = Math.sin(now * 0.008 + monk.stepSeed);
+        const soonPlanting = clamp(1 - Math.abs(monk.nextPlantAt - now) / 2200, 0, 1);
+
+        gardenCtx.save();
+        gardenCtx.translate(monk.x, monk.y);
+        gardenCtx.scale(monk.direction * size, size);
+        gardenCtx.globalAlpha = 0.9;
+        gardenCtx.strokeStyle = "rgba(255, 235, 179, 0.3)";
+        gardenCtx.lineWidth = 1.1;
+        gardenCtx.beginPath();
+        gardenCtx.arc(0, -12, 14, 0, Math.PI * 2);
+        gardenCtx.stroke();
+
+        gardenCtx.fillStyle = "rgba(5, 8, 7, 0.26)";
+        gardenCtx.beginPath();
+        gardenCtx.ellipse(0, 3, 8.5, 2.2, 0, 0, Math.PI * 2);
+        gardenCtx.fill();
+
+        gardenCtx.strokeStyle = "rgba(84, 42, 24, 0.72)";
+        gardenCtx.lineWidth = 1.4;
+        gardenCtx.beginPath();
+        gardenCtx.moveTo(-2.4, -2);
+        gardenCtx.lineTo(-4.2 + step * 1.2, 2.6);
+        gardenCtx.moveTo(2.4, -2);
+        gardenCtx.lineTo(4.2 - step * 1.2, 2.6);
+        gardenCtx.stroke();
+
+        gardenCtx.fillStyle = "rgba(203, 95, 43, 0.96)";
+        gardenCtx.beginPath();
+        gardenCtx.ellipse(0, -8, 7.1, 9.8, 0, 0, Math.PI * 2);
+        gardenCtx.fill();
+
+        gardenCtx.fillStyle = "rgba(244, 160, 65, 0.92)";
+        gardenCtx.beginPath();
+        gardenCtx.moveTo(-6.2, -11.8);
+        gardenCtx.quadraticCurveTo(1.8, -6, 6.2, 0);
+        gardenCtx.quadraticCurveTo(1.8, 1.8, -5.8, -2.4);
+        gardenCtx.closePath();
+        gardenCtx.fill();
+
+        gardenCtx.strokeStyle = "rgba(255, 226, 149, 0.56)";
+        gardenCtx.lineWidth = 0.9;
+        gardenCtx.beginPath();
+        gardenCtx.arc(0, -19, 8.6, Math.PI * 0.16, Math.PI * 0.84, true);
+        gardenCtx.stroke();
+
+        gardenCtx.fillStyle = "rgba(226, 172, 119, 0.98)";
+        gardenCtx.beginPath();
+        gardenCtx.arc(0, -18, 5.2, 0, Math.PI * 2);
+        gardenCtx.fill();
+
+        gardenCtx.fillStyle = "rgba(88, 48, 34, 0.54)";
+        gardenCtx.beginPath();
+        gardenCtx.arc(-1.4, -18.4, 0.5, 0, Math.PI * 2);
+        gardenCtx.arc(1.6, -18.4, 0.5, 0, Math.PI * 2);
+        gardenCtx.fill();
+        gardenCtx.strokeStyle = "rgba(88, 48, 34, 0.38)";
+        gardenCtx.lineWidth = 0.7;
+        gardenCtx.beginPath();
+        gardenCtx.arc(0, -17.4, 1.7, 0.1, Math.PI - 0.1);
+        gardenCtx.stroke();
+
+        if (soonPlanting > 0) {
+          gardenCtx.globalAlpha = soonPlanting * 0.75;
+          gardenCtx.fillStyle = "rgba(255, 232, 154, 0.92)";
+          gardenCtx.beginPath();
+          gardenCtx.arc(7.8, -8.8, 1.6 + soonPlanting * 1.2, 0, Math.PI * 2);
+          gardenCtx.fill();
+        }
+        gardenCtx.restore();
+      }
+
+      function drawGarden(now) {
+        gardenCtx.clearRect(0, 0, state.width, state.height);
+        gardenCtx.globalCompositeOperation = "source-over";
+
+        const plants = state.garden.plants.slice().sort((a, b) => a.ny - b.ny);
+        plants.forEach((plant) => {
+          const age = Math.max(0, Date.now() - plant.plantedAt);
+          const maturity = smoothStep(age / plant.matureMs);
+          const x = plant.nx * state.width;
+          const y = plant.ny * state.height;
+          if (plant.kind === "tree") {
+            drawTreePlant(plant, x, y, maturity, now);
+          } else {
+            drawFlowerPlant(plant, x, y, maturity, now);
+          }
+        });
+
+        drawMonk(now);
+      }
+
+      function setStroke(hue, alpha, width) {
+        ctx.strokeStyle = `hsla(${hue}, 82%, 72%, ${alpha})`;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+      }
+
+      function circle(x, y, radius) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      function line(a, b) {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+
+      function points(sides, radius, rotation) {
+        return Array.from({ length: sides }, (_, index) => {
+          const angle = rotation + index * Math.PI * 2 / sides;
+          return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius };
+        });
+      }
+
+      function polygon(vertices) {
+        ctx.beginPath();
+        vertices.forEach((point, index) => {
+          if (index === 0) {
+            ctx.moveTo(point.x, point.y);
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        });
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      function drawFlowerOfLife(unit, hue, breath) {
+        const sqrt3 = Math.sqrt(3);
+        setStroke(hue, 0.08 + breath * 0.04, 0.7 + breath * 0.35);
+        for (let q = -2; q <= 2; q += 1) {
+          for (let r = -2; r <= 2; r += 1) {
+            const s = -q - r;
+            if (Math.max(Math.abs(q), Math.abs(r), Math.abs(s)) <= 2) {
+              circle(unit * (q + r / 2), unit * (sqrt3 / 2) * r, unit);
+            }
+          }
+        }
+      }
+
+      function drawGeometry(now) {
+        const cx = state.width / 2;
+        const cy = state.height / 2;
+        const size = Math.min(state.width, state.height);
+        const unit = size * 0.104;
+        const breath = reducedMotion ? 0.5 : (Math.sin(now * 0.00042) + 1) / 2;
+        const chakra = CHAKRAS[state.chakraIndex];
+        const hue = (chakra.hue + (now * 0.0009) % 46) % 360;
+
+        ctx.clearRect(0, 0, state.width, state.height);
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(now * 0.000045);
+        ctx.globalCompositeOperation = "lighter";
+
+        drawFlowerOfLife(unit, hue, breath);
+
+        setStroke((hue + 84) % 360, 0.12 + breath * 0.035, 0.9);
+        circle(-unit * 0.72, 0, unit * 2.04);
+        circle(unit * 0.72, 0, unit * 2.04);
+        circle(0, -unit * 0.72, unit * 2.04);
+        circle(0, unit * 0.72, unit * 2.04);
+
+        const outer = unit * 3.22;
+        const inner = unit * 1.92;
+        const outerHex = points(6, outer, Math.PI / 6);
+        const innerHex = points(6, inner, Math.PI / 6);
+
+        setStroke((hue + 18) % 360, 0.16, 0.9);
+        polygon(outerHex);
+        polygon(points(3, outer * 0.92, -Math.PI / 2));
+        polygon(points(3, outer * 0.92, Math.PI / 2));
+
+        setStroke((hue + 142) % 360, 0.1, 0.65);
+        innerHex.forEach((point, index) => {
+          line({ x: 0, y: 0 }, point);
+          line(point, innerHex[(index + 2) % innerHex.length]);
+          line(point, outerHex[index]);
+          circle(point.x, point.y, 2.2 + breath * 1.2);
+        });
+
+        setStroke((hue + 302) % 360, 0.07, 0.55);
+        outerHex.forEach((point, index) => {
+          line(point, outerHex[(index + 1) % outerHex.length]);
+          line(point, outerHex[(index + 3) % outerHex.length]);
+        });
+
+        setStroke(hue, 0.18, 0.75);
+        circle(0, 0, unit * 0.36);
+        circle(0, 0, unit * 2.42);
+        circle(0, 0, unit * 3.58);
+        ctx.restore();
+
+        const glow = ctx.createRadialGradient(cx, cy, size * 0.05, cx, cy, size * 0.56);
+        glow.addColorStop(0, `rgba(255, 247, 221, ${0.16 + breath * 0.08})`);
+        glow.addColorStop(0.36, "rgba(240, 197, 107, 0.06)");
+        glow.addColorStop(0.72, "rgba(142, 223, 207, 0.025)");
+        glow.addColorStop(1, "rgba(5, 8, 7, 0)");
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, state.width, state.height);
+      }
+
+      function animate(now) {
+        updateChakraAuto(now);
+        updateBreath(now);
+        updateGarden(now);
+        drawGeometry(now);
+        drawGarden(now);
+        if (!reducedMotion) {
+          requestAnimationFrame(animate);
+        }
+      }
+
+      function startAudio() {
+        if (state.audio) {
+          awakenAudio();
+          return;
+        }
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) {
+          return;
+        }
+
+        const audio = new AudioContext();
+        const master = audio.createGain();
+        const lowpass = audio.createBiquadFilter();
+        const noiseFilter = audio.createBiquadFilter();
+
+        lowpass.type = "lowpass";
+        lowpass.frequency.value = Math.max(840, Math.min(2600, state.frequency * 2.8));
+        lowpass.Q.value = 0.28;
+        noiseFilter.type = "bandpass";
+        noiseFilter.frequency.value = state.frequency;
+        noiseFilter.Q.value = 7.2;
+
+        master.gain.value = 0;
+        master.connect(lowpass);
+        lowpass.connect(audio.destination);
+        noiseFilter.connect(master);
+
+        const voices = [
+          { ratio: 0.125, gain: 0.014, pan: -0.46, type: "sine" },
+          { ratio: 0.25, gain: 0.018, pan: 0.38, type: "sine" },
+          { ratio: 0.5, gain: 0.012, pan: -0.24, type: "triangle" },
+          { ratio: 1, gain: 0.01, pan: 0.1, type: "sine" },
+          { ratio: 1.5, gain: 0.004, pan: 0.42, type: "sine" },
+          { ratio: 2, gain: 0.003, pan: -0.08, type: "triangle" }
+        ].map((voice, index) => {
+          const osc = audio.createOscillator();
+          const gain = audio.createGain();
+          const pan = audio.createStereoPanner();
+          const lfo = audio.createOscillator();
+          const lfoGain = audio.createGain();
+
+          osc.type = voice.type;
+          osc.frequency.value = state.frequency * voice.ratio;
+          osc.detune.value = (index - 1.5) * 2.4;
+          gain.gain.value = voice.gain;
+          pan.pan.value = voice.pan;
+          lfo.frequency.value = 0.024 + index * 0.007;
+          lfoGain.gain.value = voice.gain * 0.45;
+
+          lfo.connect(lfoGain);
+          lfoGain.connect(gain.gain);
+          osc.connect(gain);
+          gain.connect(pan);
+          pan.connect(master);
+          osc.start();
+          lfo.start();
+          return { osc, ratio: voice.ratio };
+        });
+
+        const noise = audio.createBufferSource();
+        const buffer = audio.createBuffer(1, audio.sampleRate * 2, audio.sampleRate);
+        const data = buffer.getChannelData(0);
+        let last = 0;
+        for (let i = 0; i < data.length; i += 1) {
+          last = last * 0.96 + (Math.random() * 2 - 1) * 0.04;
+          data[i] = last;
+        }
+        const noiseGain = audio.createGain();
+        const noisePan = audio.createStereoPanner();
+        noise.buffer = buffer;
+        noise.loop = true;
+        noiseGain.gain.value = 0.012;
+        noisePan.pan.value = -0.04;
+        noise.connect(noiseGain);
+        noiseGain.connect(noisePan);
+        noisePan.connect(noiseFilter);
+        noise.start();
+
+        state.audio = {
+          context: audio,
+          lowpass,
+          master,
+          noiseFilter,
+          voices
+        };
+
+        awakenAudio();
+        window.addEventListener("pointerdown", awakenAudio, { passive: true });
+        window.addEventListener("keydown", awakenAudio, { passive: true });
+        window.addEventListener("touchstart", awakenAudio, { passive: true });
+        document.addEventListener("visibilitychange", () => {
+          const now = state.audio.context.currentTime;
+          state.audio.master.gain.cancelScheduledValues(now);
+          if (document.hidden) {
+            state.audio.master.gain.linearRampToValueAtTime(0.04, now + 1.6);
+          } else {
+            awakenAudio();
+          }
+        });
+      }
+
+      function awakenAudio() {
+        if (!state.audio) {
+          return;
+        }
+
+        state.audio.context.resume().then(() => {
+          const now = state.audio.context.currentTime;
+          state.audio.master.gain.cancelScheduledValues(now);
+          state.audio.master.gain.setValueAtTime(state.audio.master.gain.value, now);
+          state.audio.master.gain.linearRampToValueAtTime(state.volume, now + 4);
+        }).catch(() => {});
+      }
+
+      window.addEventListener("resize", resize, { passive: true });
+      window.addEventListener("load", startAudio, { once: true });
+      window.addEventListener("pointermove", startAudio, { once: true, passive: true });
+      window.addEventListener("beforeunload", saveGarden);
+
+      loadGarden();
+      buildChakraButtons();
+      bindControls();
+      setChakra(0);
+      setVolume(52);
+      resize();
+      seedGarden();
+      setPrayer(0);
+      animate(performance.now());
+      window.setInterval(cyclePrayer, 11200);
+    })();
+  </script>
+</body>
+</html>
