@@ -1098,6 +1098,7 @@
       const forceMediaAudio = new URLSearchParams(window.location.search).has("force-media-audio");
       const mobileUserAgent = /Android|iPhone|iPad|iPod|Mobile|CriOS|FxiOS/i.test(navigator.userAgent);
       const touchConstrainedAudio = window.matchMedia("(pointer: coarse)").matches || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+      const hasWebAudio = Boolean(window.AudioContext || window.webkitAudioContext);
       const MEDIA_BASE_FREQUENCY = 432;
       const PLANT_KINDS = [
         { kind: "flower", matureMs: 38 * 60 * 1000, weight: 5 },
@@ -1122,7 +1123,7 @@
         mediaAudio: null,
         mediaAudioUrl: "",
         mediaFrequency: 0,
-        isMobileAudio: forceMediaAudio || mobileUserAgent || touchConstrainedAudio,
+        isMobileAudio: mobileUserAgent || touchConstrainedAudio,
         gratitudeIndex: 0,
         panelCollapsed: mobileControls.matches,
         panelUserSet: false,
@@ -1318,7 +1319,7 @@
       }
 
       function shouldUseMediaAudio() {
-        return state.isMobileAudio || !(window.AudioContext || window.webkitAudioContext);
+        return forceMediaAudio || !hasWebAudio;
       }
 
       function mediaTargetVolume() {
@@ -2127,8 +2128,11 @@
 
       function nudgeAudio() {
         if (state.audioEnabled) {
-          startMediaAudio();
-          startAudio();
+          if (shouldUseMediaAudio()) {
+            startMediaAudio();
+          } else {
+            startAudio();
+          }
         }
       }
 
@@ -2137,8 +2141,11 @@
         syncAudioToggle();
 
         if (state.audioEnabled) {
-          startMediaAudio();
-          startAudio();
+          if (shouldUseMediaAudio()) {
+            startMediaAudio();
+          } else {
+            startAudio();
+          }
           return;
         }
 
@@ -2198,8 +2205,8 @@
       }
 
       function createMediaDroneUrl(frequency) {
-        const sampleRate = 22050;
-        const duration = 4;
+        const sampleRate = 44100;
+        const duration = 25;
         const samples = sampleRate * duration;
         const buffer = new ArrayBuffer(44 + samples * 2);
         const view = new DataView(buffer);
@@ -2220,14 +2227,14 @@
 
         for (let index = 0; index < samples; index += 1) {
           const time = index / sampleRate;
-          const fade = Math.min(1, index / 900, (samples - index) / 900);
-          const breath = 0.86 + Math.sin(time * Math.PI * 2 * 0.08) * 0.12;
+          const breath = 0.88 + Math.sin(time * Math.PI * 2 * 0.08) * 0.1;
+          const shimmer = 0.96 + Math.sin(time * Math.PI * 2 * 0.16) * 0.04;
           const sample = (
             Math.sin(time * Math.PI * 2 * frequency) * 0.5 +
             Math.sin(time * Math.PI * 2 * frequency * 0.5) * 0.28 +
             Math.sin(time * Math.PI * 2 * frequency * 2) * 0.1 +
             Math.sin(time * Math.PI * 2 * 432) * 0.07
-          ) * fade * breath;
+          ) * breath * shimmer;
           view.setInt16(44 + index * 2, Math.max(-0.95, Math.min(0.95, sample)) * 32767, true);
         }
 
@@ -2298,6 +2305,7 @@
           return;
         }
 
+        document.documentElement.dataset.audioMode = "media";
         const media = ensureMediaAudio();
         syncMediaAudio();
         syncMediaVolume();
@@ -2343,10 +2351,13 @@
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) {
           document.documentElement.dataset.audio = "unsupported";
+          document.documentElement.dataset.audioMode = "media";
+          startMediaAudio();
           return;
         }
 
         document.documentElement.dataset.audio = "starting";
+        document.documentElement.dataset.audioMode = "web-audio";
         const audio = new AudioContext();
         audio.onstatechange = () => {
           document.documentElement.dataset.audioContext = audio.state;
@@ -2446,6 +2457,7 @@
           state.audio.master.gain.setValueAtTime(state.audio.master.gain.value, now);
           state.audio.master.gain.linearRampToValueAtTime(webAudioTargetVolume(), now + (state.audioEnabled ? 0.9 : 0.22));
           document.documentElement.dataset.audio = state.audioEnabled ? "on" : "off";
+          document.documentElement.dataset.audioMode = "web-audio";
           document.documentElement.dataset.audioContext = state.audio.context.state;
         }).catch(() => {
           document.documentElement.dataset.audio = "blocked";
@@ -2456,8 +2468,11 @@
       function bindAudioUnlock() {
         const unlock = () => {
           if (state.audioEnabled) {
-            startMediaAudio();
-            startAudio();
+            if (shouldUseMediaAudio()) {
+              startMediaAudio();
+            } else {
+              startAudio();
+            }
           }
         };
         window.addEventListener("pointerdown", unlock, { passive: true, capture: true });
