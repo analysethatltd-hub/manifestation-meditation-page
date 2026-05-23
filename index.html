@@ -1755,6 +1755,9 @@
         if (shouldUseMediaOnly()) {
           return "media";
         }
+        if (state.audio && state.audio.bridgeMedia && !state.audio.bridgeFailed) {
+          return "web-audio-stream";
+        }
         if (shouldUseMediaOnly() && state.mediaAudio && !state.mediaAudio.paused) {
           return "hybrid";
         }
@@ -2728,6 +2731,7 @@
         state.mediaFallbackAudible = false;
         document.documentElement.dataset.audio = "off";
         syncAudioToggle();
+        pauseAudioOutputBridge();
         stopMediaAudio();
         if (state.audio) {
           const now = state.audio.context.currentTime;
@@ -2737,16 +2741,29 @@
       }
 
       function bindAudioToggle() {
+        let suppressClickUntil = 0;
         const toggle = (event) => {
+          const now = performance.now();
+          if (event.type === "click" && now < suppressClickUntil) {
+            return;
+          }
+          if (event.type === "touchend") {
+            suppressClickUntil = now + 700;
+            if (event.cancelable) {
+              event.preventDefault();
+            }
+          }
           event.stopPropagation();
           state.lastAudioGesture = event.type;
-          setAudioEnabled(!state.audioEnabled);
+          const retryUnlock = state.audioEnabled && !state.audioConfirmed;
+          setAudioEnabled(retryUnlock ? true : !state.audioEnabled);
         };
 
         const bindTrigger = (element) => {
           if (!element) {
             return;
           }
+          element.addEventListener("touchend", toggle, { passive: false });
           element.addEventListener("click", toggle);
           element.addEventListener("keydown", (event) => {
             if (event.key === "Enter" || event.key === " ") {
@@ -2934,6 +2951,13 @@
         syncAudioToggle();
       }
 
+      function pauseAudioOutputBridge() {
+        if (state.audio && state.audio.bridgeMedia) {
+          state.audio.bridgeMedia.pause();
+        }
+        document.documentElement.dataset.audioOutput = state.audio && state.audio.directConnected ? "direct" : "idle";
+      }
+
       function measureWebAudioLevel() {
         if (!state.audio || !state.audio.analyser || !state.audio.sampleData) {
           return 0;
@@ -2951,11 +2975,12 @@
         if (!audioDebugEnabled || !els.audioDebug) {
           return;
         }
-        const media = state.mediaAudio || els.mobileAudio;
+        const media = (state.audio && state.audio.bridgeMedia) || state.mediaAudio || els.mobileAudio;
         const level = measureWebAudioLevel();
         els.audioDebug.textContent = [
           `sound ${state.audioEnabled ? "on" : "off"} | ${document.documentElement.dataset.audioMode || "idle"}`,
           `ctx ${document.documentElement.dataset.audioContext || "none"} | web ${document.documentElement.dataset.audio || "idle"}`,
+          `out ${document.documentElement.dataset.audioOutput || "n/a"}`,
           `media ${document.documentElement.dataset.audioMedia || "idle"} | ready ${media ? media.readyState : "n/a"} | t ${media ? media.currentTime.toFixed(1) : "0.0"} | vol ${media ? media.volume.toFixed(2) : "0.00"}`,
           `level ${level.toFixed(3)} | gesture ${state.lastAudioGesture}`,
           `ua ${state.isMobileAudio ? "mobile/touch" : "desktop"}`
@@ -3034,8 +3059,95 @@
         return pan;
       }
 
+      function connectDirectAudioOutput() {
+        if (!state.audio || state.audio.directConnected) {
+          return;
+        }
+        try {
+          state.audio.analyser.connect(state.audio.context.destination);
+          state.audio.directConnected = true;
+          document.documentElement.dataset.audioOutput = state.audio.bridgeMedia ? "stream+direct" : "direct";
+        } catch (error) {
+          document.documentElement.dataset.audioOutput = "direct-error";
+        }
+      }
+
+      function createAudioOutputBridge(audio, analyser) {
+        if (!state.isMobileAudio || shouldUseMediaOnly() || !audio.createMediaStreamDestination || !els.mobileAudio) {
+          return null;
+        }
+
+        try {
+          const bridge = audio.createMediaStreamDestination();
+          analyser.connect(bridge);
+          const media = els.mobileAudio;
+          media.pause();
+          media.removeAttribute("src");
+          media.srcObject = bridge.stream;
+          media.loop = false;
+          media.preload = "auto";
+          media.controls = false;
+          media.muted = false;
+          media.volume = 1;
+          media.setAttribute("playsinline", "");
+          media.setAttribute("webkit-playsinline", "");
+          document.documentElement.dataset.audioOutput = "stream";
+          document.documentElement.dataset.audioMedia = "stream-starting";
+          let playRequest = null;
+          try {
+            playRequest = media.play();
+          } catch (error) {
+            document.documentElement.dataset.audioMedia = "stream-error";
+            document.documentElement.dataset.audioError = error && error.name ? error.name : "stream-play-error";
+          }
+          return { bridge, media, playRequest };
+        } catch (error) {
+          document.documentElement.dataset.audioOutput = "stream-error";
+          return null;
+        }
+      }
+
+      function playAudioOutputBridge() {
+        if (!state.audio || !state.audio.bridgeMedia || !state.audioEnabled) {
+          return Promise.resolve(true);
+        }
+
+        const media = state.audio.bridgeMedia;
+        media.muted = false;
+        media.volume = 1;
+        document.documentElement.dataset.audioMedia = "stream-starting";
+        try {
+          const playRequest = state.audio.bridgePlayRequest || media.play();
+          state.audio.bridgePlayRequest = null;
+          if (playRequest && typeof playRequest.then === "function") {
+            return playRequest.then(() => {
+              state.audio.bridgeFailed = false;
+              document.documentElement.dataset.audioMedia = "stream-on";
+              document.documentElement.dataset.audioOutput = state.audio.directConnected ? "stream+direct" : "stream";
+              return true;
+            }).catch((error) => {
+              state.audio.bridgeFailed = true;
+              document.documentElement.dataset.audioMedia = "stream-blocked";
+              document.documentElement.dataset.audioError = error && error.name ? error.name : "stream-play-failed";
+              connectDirectAudioOutput();
+              return false;
+            });
+          }
+          state.audio.bridgeFailed = false;
+          document.documentElement.dataset.audioMedia = "stream-on";
+          return Promise.resolve(true);
+        } catch (error) {
+          state.audio.bridgeFailed = true;
+          document.documentElement.dataset.audioMedia = "stream-error";
+          document.documentElement.dataset.audioError = error && error.name ? error.name : "stream-play-error";
+          connectDirectAudioOutput();
+          return Promise.resolve(false);
+        }
+      }
+
       function markWebAudioConfirmed() {
-        state.audioConfirmed = Boolean(state.audioEnabled && state.audio && state.audio.context.state === "running");
+        const bridgeReady = !state.audio || !state.audio.bridgeMedia || state.audio.bridgeFailed || !state.audio.bridgeMedia.paused;
+        state.audioConfirmed = Boolean(state.audioEnabled && state.audio && state.audio.context.state === "running" && bridgeReady);
         document.documentElement.dataset.audioActive = String(state.audioConfirmed);
         syncAudioToggle();
       }
@@ -3116,8 +3228,8 @@
         master.connect(lowpass);
         lowpass.connect(compressor);
         compressor.connect(analyser);
-        analyser.connect(audio.destination);
         airFilter.connect(master);
+        const outputBridge = createAudioOutputBridge(audio, analyser);
 
         const voices = [
           { ratio: 1, gain: 0.02, pan: 0, type: "sine", detune: 0, bus: "focus", lfo: 0.018 },
@@ -3165,8 +3277,15 @@
           airFilter,
           voices,
           analyser,
-          sampleData: new Uint8Array(analyser.fftSize)
+          sampleData: new Uint8Array(analyser.fftSize),
+          bridgeMedia: outputBridge ? outputBridge.media : null,
+          bridgePlayRequest: outputBridge ? outputBridge.playRequest : null,
+          bridgeFailed: false,
+          directConnected: false
         };
+        if (!outputBridge) {
+          connectDirectAudioOutput();
+        }
 
         document.documentElement.dataset.audio = state.audioEnabled ? audio.state : "off";
         document.documentElement.dataset.audioContext = audio.state;
@@ -3187,7 +3306,8 @@
           return;
         }
 
-        state.audio.context.resume().then(() => {
+        const bridgePlay = playAudioOutputBridge();
+        state.audio.context.resume().then(() => bridgePlay).then(() => {
           const now = state.audio.context.currentTime;
           state.audio.master.gain.cancelScheduledValues(now);
           state.audio.master.gain.setValueAtTime(state.audio.master.gain.value, now);
