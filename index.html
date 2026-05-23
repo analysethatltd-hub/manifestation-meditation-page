@@ -306,6 +306,19 @@
       box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.28), inset 0 0 2rem rgba(255, 247, 221, 0.04);
       backdrop-filter: blur(14px);
       font-family: "Segoe UI", Arial, sans-serif;
+      touch-action: pan-y;
+      transition: width 300ms ease, padding 300ms ease, background 300ms ease, box-shadow 300ms ease;
+    }
+
+    .chakra-panel[data-collapsed="true"] {
+      width: min(14.8rem, calc(100vw - 2rem));
+      padding: 0.56rem 0.64rem;
+      background: rgba(5, 8, 7, 0.5);
+      box-shadow: 0 0.8rem 2.2rem rgba(0, 0, 0, 0.24), inset 0 0 1.4rem rgba(255, 247, 221, 0.04);
+    }
+
+    .chakra-panel[data-collapsed="true"] .chakra-body {
+      display: none;
     }
 
     .chakra-head {
@@ -314,6 +327,17 @@
       justify-content: space-between;
       gap: 0.8rem;
       margin-bottom: 0.65rem;
+    }
+
+    .chakra-panel[data-collapsed="true"] .chakra-head {
+      align-items: center;
+      margin-bottom: 0;
+    }
+
+    .chakra-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.38rem;
     }
 
     .chakra-name {
@@ -332,6 +356,35 @@
       line-height: 1.3;
       text-align: right;
       font-variant-numeric: tabular-nums;
+    }
+
+    .panel-toggle {
+      display: grid;
+      place-items: center;
+      inline-size: 2rem;
+      block-size: 2rem;
+      border: 1px solid rgba(255, 247, 221, 0.16);
+      border-radius: 50%;
+      background: rgba(255, 247, 221, 0.08);
+      color: rgba(255, 247, 221, 0.82);
+      cursor: pointer;
+    }
+
+    .panel-toggle::before {
+      content: "";
+      inline-size: 0.46rem;
+      block-size: 0.46rem;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg) translate(-1px, -1px);
+    }
+
+    .chakra-panel[data-collapsed="true"] .panel-toggle::before {
+      transform: rotate(225deg) translate(-1px, -1px);
+    }
+
+    .chakra-body {
+      display: grid;
     }
 
     .chakra-buttons {
@@ -480,11 +533,28 @@
       }
 
       .chakra-panel {
-        left: 0.75rem;
-        right: 0.75rem;
+        left: 50%;
+        right: auto;
         bottom: 0.75rem;
-        width: auto;
+        width: min(22rem, calc(100vw - 1.5rem));
         padding: 0.68rem;
+        max-height: calc(100svh - 1.5rem);
+        overflow: hidden;
+        transform: translateX(-50%);
+      }
+
+      .chakra-panel[data-collapsed="true"] {
+        width: min(14.8rem, calc(100vw - 1.5rem));
+        padding: 0.52rem 0.62rem;
+      }
+
+      .chakra-buttons {
+        gap: 0.3rem;
+        margin-bottom: 0.58rem;
+      }
+
+      .chakra-row {
+        margin-top: 0.48rem;
       }
     }
 
@@ -521,34 +591,39 @@
       </div>
     </section>
 
-    <aside class="chakra-panel" aria-label="Chakra frequency controls">
+    <aside class="chakra-panel" id="chakraPanel" aria-label="Chakra frequency controls">
       <div class="chakra-head">
         <div>
           <strong class="chakra-name" id="chakraName">Root</strong>
         </div>
-        <output class="chakra-frequency" id="chakraFrequency">396 Hz</output>
+        <div class="chakra-head-actions">
+          <output class="chakra-frequency" id="chakraFrequency">396 Hz</output>
+          <button class="panel-toggle" id="panelToggle" type="button" aria-label="Minimize controls" aria-expanded="true" title="Minimize controls"></button>
+        </div>
       </div>
 
-      <div class="chakra-buttons" id="chakraButtons" role="group" aria-label="Choose chakra"></div>
+      <div class="chakra-body" id="chakraBody">
+        <div class="chakra-buttons" id="chakraButtons" role="group" aria-label="Choose chakra"></div>
 
-      <label class="auto-label">
-        <span>Auto</span>
-        <input id="autoChakra" type="checkbox" checked>
-      </label>
+        <label class="auto-label">
+          <span>Auto</span>
+          <input id="autoChakra" type="checkbox" checked>
+        </label>
 
-      <label class="chakra-row range-field">
-        <span class="control-line">
-          <output class="range-value" id="frequencyValue">396 Hz</output>
-        </span>
-        <input id="frequencyRange" type="range" min="174" max="963" step="1" value="396" aria-label="Frequency">
-      </label>
+        <label class="chakra-row range-field">
+          <span class="control-line">
+            <output class="range-value" id="frequencyValue">396 Hz</output>
+          </span>
+          <input id="frequencyRange" type="range" min="174" max="963" step="1" value="396" aria-label="Frequency">
+        </label>
 
-      <label class="chakra-row range-field">
-        <span class="control-line">
-          <output class="range-value" id="volumeValue">52%</output>
-        </span>
-        <input id="volumeRange" type="range" min="0" max="80" step="1" value="52" aria-label="Volume">
-      </label>
+        <label class="chakra-row range-field">
+          <span class="control-line">
+            <output class="range-value" id="volumeValue">52%</output>
+          </span>
+          <input id="volumeRange" type="range" min="0" max="80" step="1" value="52" aria-label="Volume">
+        </label>
+      </div>
     </aside>
   </main>
 
@@ -565,8 +640,11 @@
         line: document.getElementById("prayerLine"),
         phase: document.getElementById("phaseText"),
         count: document.getElementById("phaseCount"),
+        chakraPanel: document.getElementById("chakraPanel"),
+        chakraBody: document.getElementById("chakraBody"),
         chakraName: document.getElementById("chakraName"),
         chakraFrequency: document.getElementById("chakraFrequency"),
+        panelToggle: document.getElementById("panelToggle"),
         chakraButtons: document.getElementById("chakraButtons"),
         autoChakra: document.getElementById("autoChakra"),
         frequencyRange: document.getElementById("frequencyRange"),
@@ -627,6 +705,7 @@
       const GARDEN_KEY = "manifestationGarden.v1";
       const GARDEN_LIMIT = 420;
       const PLANT_INTERVAL_MS = 72000;
+      const mobileControls = window.matchMedia("(max-width: 760px)");
       const PLANT_KINDS = [
         { kind: "flower", matureMs: 38 * 60 * 1000, weight: 5 },
         { kind: "tree", matureMs: 150 * 60 * 1000, weight: 1 }
@@ -646,19 +725,28 @@
         frequency: CHAKRAS[0].frequency,
         volume: 0.52,
         audio: null,
+        panelCollapsed: mobileControls.matches,
+        panelUserSet: false,
+        panelGesture: null,
         garden: {
           plants: [],
           lastTick: performance.now(),
           lastSave: 0,
           plantCount: 0,
-          monk: {
+          bee: {
             x: 0,
             y: 0,
             targetX: 0,
             targetY: 0,
+            vx: 0,
+            vy: 0,
             direction: 1,
+            action: "scout",
+            actionUntil: performance.now() + 3200,
             nextPlantAt: performance.now() + 7400,
-            stepSeed: Math.random() * Math.PI * 2
+            pollen: 0,
+            stepSeed: Math.random() * Math.PI * 2,
+            wingSeed: Math.random() * Math.PI * 2
           }
         }
       };
@@ -679,8 +767,12 @@
         gardenCanvas.style.width = `${state.width}px`;
         gardenCanvas.style.height = `${state.height}px`;
         gardenCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
-        if (!state.garden.monk.x || !state.garden.monk.y) {
-          placeMonk();
+        if (!state.panelUserSet) {
+          state.panelCollapsed = mobileControls.matches;
+        }
+        syncPanelUi();
+        if (!state.garden.bee.x || !state.garden.bee.y) {
+          placeBee();
         }
         window.setTimeout(fitPrayer, 0);
       }
@@ -697,6 +789,21 @@
       function setPrayer(index) {
         els.line.textContent = PRAYERS[index];
         fitPrayer();
+      }
+
+      function syncPanelUi() {
+        els.chakraPanel.dataset.collapsed = String(state.panelCollapsed);
+        els.panelToggle.setAttribute("aria-expanded", String(!state.panelCollapsed));
+        els.panelToggle.setAttribute("aria-label", state.panelCollapsed ? "Expand controls" : "Minimize controls");
+        els.panelToggle.title = state.panelCollapsed ? "Expand controls" : "Minimize controls";
+      }
+
+      function setPanelCollapsed(collapsed, userSet = true) {
+        state.panelCollapsed = collapsed;
+        if (userSet) {
+          state.panelUserSet = true;
+        }
+        syncPanelUi();
       }
 
       function formatFrequency(value) {
@@ -805,6 +912,73 @@
           setVolume(els.volumeRange.value);
           startAudio();
         });
+      }
+
+      function bindPanelControls() {
+        const rememberSwipeStart = (x, y) => {
+          state.panelGesture = { x, y };
+        };
+
+        const finishSwipe = (x, y) => {
+          if (!state.panelGesture) {
+            return;
+          }
+          const dx = x - state.panelGesture.x;
+          const dy = y - state.panelGesture.y;
+          state.panelGesture = null;
+          if (Math.abs(dy) > 38 && Math.abs(dy) > Math.abs(dx) * 1.15) {
+            setPanelCollapsed(dy > 0);
+            startAudio();
+          }
+        };
+
+        els.panelToggle.addEventListener("click", (event) => {
+          event.stopPropagation();
+          setPanelCollapsed(!state.panelCollapsed);
+          startAudio();
+        });
+
+        els.chakraPanel.addEventListener("click", (event) => {
+          if (state.panelCollapsed && !event.target.closest(".panel-toggle")) {
+            setPanelCollapsed(false);
+            startAudio();
+          }
+        });
+
+        els.chakraPanel.addEventListener("pointerdown", (event) => {
+          startAudio();
+          rememberSwipeStart(event.clientX, event.clientY);
+        }, { passive: true });
+
+        window.addEventListener("pointerup", (event) => {
+          finishSwipe(event.clientX, event.clientY);
+        }, { passive: true });
+
+        els.chakraPanel.addEventListener("touchstart", (event) => {
+          const touch = event.touches[0];
+          if (touch) {
+            rememberSwipeStart(touch.clientX, touch.clientY);
+          }
+        }, { passive: true });
+
+        window.addEventListener("touchend", (event) => {
+          const touch = event.changedTouches[0];
+          if (touch) {
+            finishSwipe(touch.clientX, touch.clientY);
+          }
+        }, { passive: true });
+
+        const followViewport = () => {
+          if (!state.panelUserSet) {
+            setPanelCollapsed(mobileControls.matches, false);
+          }
+        };
+
+        if (mobileControls.addEventListener) {
+          mobileControls.addEventListener("change", followViewport);
+        } else {
+          mobileControls.addListener(followViewport);
+        }
       }
 
       function cyclePrayer() {
@@ -962,74 +1136,125 @@
         saveGarden();
       }
 
-      function placeMonk() {
+      function chooseBeeTarget() {
+        const now = Date.now();
+        const plants = state.garden.plants.filter((plant) => {
+          const age = now - plant.plantedAt;
+          return age > plant.matureMs * 0.18;
+        });
+
+        if (plants.length > 0 && Math.random() < 0.68) {
+          const plant = plants[Math.floor(Math.random() * plants.length)];
+          const lift = plant.kind === "tree" ? 28 : 13;
+          return {
+            x: clamp(plant.nx * state.width + (Math.random() * 28 - 14), 24, state.width - 24),
+            y: clamp(plant.ny * state.height - lift + (Math.random() * 20 - 10), 24, state.height - 24),
+            action: "pollinate"
+          };
+        }
+
+        return {
+          ...randomGardenPoint(),
+          action: Math.random() < 0.26 ? "dart" : "scout"
+        };
+      }
+
+      function placeBee() {
         const point = randomGardenPoint();
-        const target = randomGardenPoint();
-        const monk = state.garden.monk;
-        monk.x = point.x;
-        monk.y = point.y;
-        monk.targetX = target.x;
-        monk.targetY = target.y;
+        const bee = state.garden.bee;
+        bee.x = point.x;
+        bee.y = point.y;
+        setBeeTarget();
       }
 
-      function setMonkTarget() {
-        const target = randomGardenPoint();
-        state.garden.monk.targetX = target.x;
-        state.garden.monk.targetY = target.y;
+      function setBeeTarget() {
+        const target = chooseBeeTarget();
+        const bee = state.garden.bee;
+        bee.targetX = target.x;
+        bee.targetY = target.y;
+        bee.action = target.action;
+        bee.actionUntil = performance.now() + (
+          target.action === "pollinate"
+            ? 2600 + Math.random() * 2600
+            : target.action === "dart"
+              ? 900 + Math.random() * 1200
+              : 2200 + Math.random() * 3200
+        );
       }
 
-      function plantNearMonk(now) {
-        const monk = state.garden.monk;
+      function pollinateNearBee(now) {
+        const bee = state.garden.bee;
         let point = {
-          x: clamp(monk.x + (Math.random() * 30 - 15), 24, state.width - 24),
-          y: clamp(monk.y + (Math.random() * 26 - 13), 24, state.height - 24)
+          x: clamp(bee.x + (Math.random() * 44 - 22), 24, state.width - 24),
+          y: clamp(bee.y + (Math.random() * 36 - 10), 24, state.height - 24)
         };
         const centerDistance = Math.hypot(point.x - state.width / 2, point.y - state.height / 2);
         if (centerDistance < Math.min(state.width, state.height) * 0.24) {
           point = randomGardenPoint();
         }
-        state.garden.plants.push(gardenPointToPlant(point, choosePlantKind(), Date.now()));
+
+        const kind = Math.random() < 0.82 ? "flower" : choosePlantKind();
+        state.garden.plants.push(gardenPointToPlant(point, kind, Date.now()));
         if (state.garden.plants.length > GARDEN_LIMIT) {
           state.garden.plants = state.garden.plants.slice(-GARDEN_LIMIT);
         }
-        state.garden.monk.nextPlantAt = now + PLANT_INTERVAL_MS * (0.74 + Math.random() * 0.68);
+        bee.pollen = 1;
+        bee.nextPlantAt = now + PLANT_INTERVAL_MS * (0.48 + Math.random() * 0.42);
         saveGarden();
       }
 
       function updateGarden(now) {
         const garden = state.garden;
-        const monk = garden.monk;
+        const bee = garden.bee;
         const dt = Math.min(0.09, Math.max(0, (now - garden.lastTick) / 1000));
         garden.lastTick = now;
 
         if (!reducedMotion) {
-          const dx = monk.targetX - monk.x;
-          const dy = monk.targetY - monk.y;
+          const dx = bee.targetX - bee.x;
+          const dy = bee.targetY - bee.y;
           const distance = Math.hypot(dx, dy);
-          const speed = 12 + Math.sin(now * 0.00064 + monk.stepSeed) * 3.5;
 
-          if (distance < 10) {
-            setMonkTarget();
-          } else {
-            monk.x += dx / distance * speed * dt;
-            monk.y += dy / distance * speed * dt;
-            monk.direction = dx < 0 ? -1 : 1;
+          if (distance < (bee.action === "pollinate" ? 16 : 10) || now > bee.actionUntil) {
+            if (bee.action === "pollinate" && distance < 36 && now >= bee.nextPlantAt) {
+              pollinateNearBee(now);
+            }
+            setBeeTarget();
+          } else if (distance > 0.5) {
+            const nx = dx / distance;
+            const ny = dy / distance;
+            const px = -ny;
+            const py = nx;
+            const baseSpeed = bee.action === "dart" ? 84 : bee.action === "pollinate" ? 36 : 54;
+            const pulse = Math.sin(now * 0.012 + bee.stepSeed) * (bee.action === "dart" ? 18 : 8);
+            const wobble = Math.sin(now * 0.02 + bee.stepSeed) * (bee.action === "pollinate" ? 18 : 30);
+            bee.vx = nx * (baseSpeed + pulse) + px * wobble;
+            bee.vy = ny * (baseSpeed + pulse) + py * wobble;
+            bee.x += bee.vx * dt;
+            bee.y += bee.vy * dt;
+            bee.direction = bee.vx < 0 ? -1 : 1;
+
+            if (bee.action === "pollinate" && distance < 42) {
+              bee.pollen = Math.max(bee.pollen, 0.64);
+              if (now >= bee.nextPlantAt) {
+                pollinateNearBee(now);
+              }
+            }
 
             const centerX = state.width / 2;
             const centerY = state.height / 2;
             const focusClear = Math.min(state.width, state.height) * 0.24;
-            const centerDistance = Math.hypot(monk.x - centerX, monk.y - centerY);
+            const centerDistance = Math.hypot(bee.x - centerX, bee.y - centerY);
             if (centerDistance < focusClear) {
-              const angle = Math.atan2(monk.y - centerY, monk.x - centerX);
-              monk.x = centerX + Math.cos(angle) * focusClear;
-              monk.y = centerY + Math.sin(angle) * focusClear;
-              setMonkTarget();
+              const angle = Math.atan2(bee.y - centerY, bee.x - centerX);
+              bee.x = centerX + Math.cos(angle) * focusClear;
+              bee.y = centerY + Math.sin(angle) * focusClear;
+              setBeeTarget();
             }
           }
 
-          if (now >= monk.nextPlantAt) {
-            plantNearMonk(now);
-          }
+          bee.pollen = Math.max(0, bee.pollen - dt * 0.72);
+          bee.x = clamp(bee.x, 16, state.width - 16);
+          bee.y = clamp(bee.y, 16, state.height - 16);
         }
 
         if (now - garden.lastSave > 18000) {
@@ -1108,77 +1333,80 @@
         gardenCtx.restore();
       }
 
-      function drawMonk(now) {
-        const monk = state.garden.monk;
-        const size = clamp(Math.min(state.width, state.height) / 690, 0.82, 1.18);
-        const step = Math.sin(now * 0.008 + monk.stepSeed);
-        const soonPlanting = clamp(1 - Math.abs(monk.nextPlantAt - now) / 2200, 0, 1);
+      function drawBee(now) {
+        const bee = state.garden.bee;
+        const size = clamp(Math.min(state.width, state.height) / 650, 0.76, 1.22);
+        const speed = Math.hypot(bee.vx, bee.vy);
+        const angle = speed > 1 ? Math.atan2(bee.vy, bee.vx) : 0;
+        const hover = Math.sin(now * 0.009 + bee.stepSeed) * 2.2;
+        const wing = Math.sin(now * 0.064 + bee.wingSeed);
+        const pollenGlow = bee.action === "pollinate" ? Math.max(bee.pollen, 0.28) : bee.pollen;
 
         gardenCtx.save();
-        gardenCtx.translate(monk.x, monk.y);
-        gardenCtx.scale(monk.direction * size, size);
-        gardenCtx.globalAlpha = 0.9;
-        gardenCtx.strokeStyle = "rgba(255, 235, 179, 0.3)";
-        gardenCtx.lineWidth = 1.1;
+        gardenCtx.translate(bee.x, bee.y + 7);
+        gardenCtx.globalAlpha = 0.22;
+        gardenCtx.fillStyle = "rgba(5, 8, 7, 0.5)";
         gardenCtx.beginPath();
-        gardenCtx.arc(0, -12, 14, 0, Math.PI * 2);
-        gardenCtx.stroke();
+        gardenCtx.ellipse(0, 0, 8.8 * size, 2.2 * size, 0, 0, Math.PI * 2);
+        gardenCtx.fill();
+        gardenCtx.restore();
 
-        gardenCtx.fillStyle = "rgba(5, 8, 7, 0.26)";
+        gardenCtx.save();
+        gardenCtx.translate(bee.x, bee.y + hover);
+        gardenCtx.rotate(angle);
+        gardenCtx.scale(size, size);
+
+        gardenCtx.globalAlpha = 0.34 + Math.abs(wing) * 0.18;
+        gardenCtx.fillStyle = "rgba(214, 250, 255, 0.74)";
         gardenCtx.beginPath();
-        gardenCtx.ellipse(0, 3, 8.5, 2.2, 0, 0, Math.PI * 2);
+        gardenCtx.ellipse(-2.2, -5.4, 7.6, 3.1, -0.72 - wing * 0.18, 0, Math.PI * 2);
+        gardenCtx.ellipse(-2.2, 5.4, 7.6, 3.1, 0.72 + wing * 0.18, 0, Math.PI * 2);
         gardenCtx.fill();
 
-        gardenCtx.strokeStyle = "rgba(84, 42, 24, 0.72)";
-        gardenCtx.lineWidth = 1.4;
+        gardenCtx.globalAlpha = 0.95;
+        gardenCtx.fillStyle = "rgba(251, 198, 64, 0.98)";
         gardenCtx.beginPath();
-        gardenCtx.moveTo(-2.4, -2);
-        gardenCtx.lineTo(-4.2 + step * 1.2, 2.6);
-        gardenCtx.moveTo(2.4, -2);
-        gardenCtx.lineTo(4.2 - step * 1.2, 2.6);
-        gardenCtx.stroke();
-
-        gardenCtx.fillStyle = "rgba(203, 95, 43, 0.96)";
-        gardenCtx.beginPath();
-        gardenCtx.ellipse(0, -8, 7.1, 9.8, 0, 0, Math.PI * 2);
+        gardenCtx.ellipse(0, 0, 10.4, 6.1, 0, 0, Math.PI * 2);
         gardenCtx.fill();
 
-        gardenCtx.fillStyle = "rgba(244, 160, 65, 0.92)";
+        gardenCtx.fillStyle = "rgba(21, 17, 13, 0.9)";
+        [-4.4, 0.2, 4.6].forEach((stripe) => {
+          gardenCtx.beginPath();
+          gardenCtx.ellipse(stripe, 0, 1.5, 5.7, 0, 0, Math.PI * 2);
+          gardenCtx.fill();
+        });
+
+        gardenCtx.fillStyle = "rgba(33, 24, 15, 0.92)";
         gardenCtx.beginPath();
-        gardenCtx.moveTo(-6.2, -11.8);
-        gardenCtx.quadraticCurveTo(1.8, -6, 6.2, 0);
-        gardenCtx.quadraticCurveTo(1.8, 1.8, -5.8, -2.4);
+        gardenCtx.arc(9.2, 0, 4.2, 0, Math.PI * 2);
+        gardenCtx.fill();
+
+        gardenCtx.strokeStyle = "rgba(33, 24, 15, 0.72)";
+        gardenCtx.lineWidth = 1;
+        gardenCtx.beginPath();
+        gardenCtx.moveTo(11.4, -2.2);
+        gardenCtx.quadraticCurveTo(15.2, -6.2, 17.2, -4.8);
+        gardenCtx.moveTo(11.4, 2.2);
+        gardenCtx.quadraticCurveTo(15.2, 6.2, 17.2, 4.8);
+        gardenCtx.stroke();
+
+        gardenCtx.fillStyle = "rgba(255, 235, 149, 0.86)";
+        gardenCtx.beginPath();
+        gardenCtx.moveTo(-10.6, 0);
+        gardenCtx.lineTo(-14.2, -2.2);
+        gardenCtx.lineTo(-14.2, 2.2);
         gardenCtx.closePath();
         gardenCtx.fill();
 
-        gardenCtx.strokeStyle = "rgba(255, 226, 149, 0.56)";
-        gardenCtx.lineWidth = 0.9;
-        gardenCtx.beginPath();
-        gardenCtx.arc(0, -19, 8.6, Math.PI * 0.16, Math.PI * 0.84, true);
-        gardenCtx.stroke();
-
-        gardenCtx.fillStyle = "rgba(226, 172, 119, 0.98)";
-        gardenCtx.beginPath();
-        gardenCtx.arc(0, -18, 5.2, 0, Math.PI * 2);
-        gardenCtx.fill();
-
-        gardenCtx.fillStyle = "rgba(88, 48, 34, 0.54)";
-        gardenCtx.beginPath();
-        gardenCtx.arc(-1.4, -18.4, 0.5, 0, Math.PI * 2);
-        gardenCtx.arc(1.6, -18.4, 0.5, 0, Math.PI * 2);
-        gardenCtx.fill();
-        gardenCtx.strokeStyle = "rgba(88, 48, 34, 0.38)";
-        gardenCtx.lineWidth = 0.7;
-        gardenCtx.beginPath();
-        gardenCtx.arc(0, -17.4, 1.7, 0.1, Math.PI - 0.1);
-        gardenCtx.stroke();
-
-        if (soonPlanting > 0) {
-          gardenCtx.globalAlpha = soonPlanting * 0.75;
-          gardenCtx.fillStyle = "rgba(255, 232, 154, 0.92)";
-          gardenCtx.beginPath();
-          gardenCtx.arc(7.8, -8.8, 1.6 + soonPlanting * 1.2, 0, Math.PI * 2);
-          gardenCtx.fill();
+        if (pollenGlow > 0) {
+          gardenCtx.globalAlpha = pollenGlow * 0.72;
+          gardenCtx.fillStyle = "rgba(255, 235, 143, 0.92)";
+          for (let dot = 0; dot < 5; dot += 1) {
+            const drift = now * 0.004 + dot;
+            gardenCtx.beginPath();
+            gardenCtx.arc(-13 - dot * 3.6, Math.sin(drift) * 4.6, 1.2 - dot * 0.1, 0, Math.PI * 2);
+            gardenCtx.fill();
+          }
         }
         gardenCtx.restore();
       }
@@ -1200,7 +1428,7 @@
           }
         });
 
-        drawMonk(now);
+        drawBee(now);
       }
 
       function setStroke(hue, alpha, width) {
@@ -1337,9 +1565,11 @@
 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) {
+          document.documentElement.dataset.audio = "unsupported";
           return;
         }
 
+        document.documentElement.dataset.audio = "starting";
         const audio = new AudioContext();
         const master = audio.createGain();
         const lowpass = audio.createBiquadFilter();
@@ -1416,10 +1646,8 @@
           voices
         };
 
+        document.documentElement.dataset.audio = audio.state;
         awakenAudio();
-        window.addEventListener("pointerdown", awakenAudio, { passive: true });
-        window.addEventListener("keydown", awakenAudio, { passive: true });
-        window.addEventListener("touchstart", awakenAudio, { passive: true });
         document.addEventListener("visibilitychange", () => {
           const now = state.audio.context.currentTime;
           state.audio.master.gain.cancelScheduledValues(now);
@@ -1441,17 +1669,29 @@
           state.audio.master.gain.cancelScheduledValues(now);
           state.audio.master.gain.setValueAtTime(state.audio.master.gain.value, now);
           state.audio.master.gain.linearRampToValueAtTime(state.volume, now + 4);
-        }).catch(() => {});
+          document.documentElement.dataset.audio = "on";
+        }).catch(() => {
+          document.documentElement.dataset.audio = "blocked";
+        });
+      }
+
+      function bindAudioUnlock() {
+        const unlock = () => startAudio();
+        window.addEventListener("pointerdown", unlock, { passive: true, capture: true });
+        window.addEventListener("touchstart", unlock, { passive: true, capture: true });
+        window.addEventListener("touchend", unlock, { passive: true, capture: true });
+        window.addEventListener("click", unlock, { passive: true, capture: true });
+        window.addEventListener("keydown", unlock, { passive: true });
       }
 
       window.addEventListener("resize", resize, { passive: true });
-      window.addEventListener("load", startAudio, { once: true });
-      window.addEventListener("pointermove", startAudio, { once: true, passive: true });
       window.addEventListener("beforeunload", saveGarden);
 
       loadGarden();
       buildChakraButtons();
       bindControls();
+      bindPanelControls();
+      bindAudioUnlock();
       setChakra(0);
       setVolume(52);
       resize();
