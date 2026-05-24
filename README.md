@@ -17,7 +17,7 @@ It is intentionally not a dashboard, not a course, and not a content feed. The p
 ## Product Highlights
 
 - **Mantras as the centrepiece**  
-  Large rotating phrases keep the experience emotionally direct and visually calm.
+  A 365-phrase mantra pool keeps the experience emotionally direct without getting stale too quickly.
 
 - **Guided breathwork**  
   A fixed central breath circle guides inhale, hold, release, and rest without pulling the eye away from the focal point.

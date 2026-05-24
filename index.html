@@ -159,10 +159,11 @@
       margin: 0;
       color: var(--mist);
       font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-      font-size: 5.1rem;
+      font-size: var(--mantra-font-size, 5.1rem);
       line-height: 0.98;
       font-weight: 500;
       text-wrap: balance;
+      overflow-wrap: break-word;
       text-shadow:
         0 0 1rem rgba(240, 197, 107, 0.36),
         0 1.2rem 4rem rgba(5, 8, 7, 0.66);
@@ -1010,18 +1011,18 @@
       }
 
       .mantra {
-        top: 2rem;
-        width: min(28rem, calc(100vw - 2rem));
+        top: calc(env(safe-area-inset-top, 0px) + 4.35rem);
+        width: min(30rem, calc(100vw - 1.5rem));
       }
 
       html[data-audio-active="false"] .mantra {
-        top: 5.1rem;
+        top: calc(env(safe-area-inset-top, 0px) + 5.15rem);
         width: min(28rem, calc(100vw - 1.5rem));
       }
 
       h1,
       .mantra.compact h1 {
-        font-size: 2.65rem;
+        font-size: var(--mantra-font-size, 2.5rem);
         line-height: 1;
       }
 
@@ -1396,7 +1397,7 @@
         { name: "Crown", frequency: 963, hue: 286 }
       ];
 
-      const MANTRAS = [
+      const FOUNDATIONAL_MANTRAS = [
         "I am aligned.",
         "I remember who I am.",
         "My desires are purified in love.",
@@ -1420,13 +1421,73 @@
         "I release every counterfeit path.",
         "I am allowed to be transformed.",
         "The answer can be simple.",
-        "My spirit knows the way home.",
-        "Faith is my posture.",
+        "My inner self knows the way home.",
+        "Trust is my posture.",
         "I receive, then I become responsible.",
         "I am becoming ready.",
         "I am connected.",
         "The blessing is not separate from my healing."
       ];
+
+      const MANTRA_THEMES = [
+        "my breath",
+        "my body",
+        "my heart",
+        "my attention",
+        "my desire",
+        "my timing",
+        "my choices",
+        "my courage",
+        "my clarity",
+        "my rest",
+        "my energy",
+        "my work",
+        "my voice",
+        "my boundaries",
+        "my imagination",
+        "my patience",
+        "my receiving",
+        "my healing",
+        "my next step",
+        "my inner rhythm",
+        "this moment"
+      ];
+
+      const MANTRA_PATTERNS = [
+        (theme) => `I return to ${theme}.`,
+        (theme) => `I listen to ${theme} with kindness.`,
+        (theme) => `I let ${theme} become simple.`,
+        (theme) => `I trust the quiet within ${theme}.`,
+        (theme) => `${capitalizePhrase(theme)} has room to breathe.`,
+        (theme) => `${capitalizePhrase(theme)} is becoming clear.`,
+        (theme) => `${capitalizePhrase(theme)} moves at the right pace.`,
+        (theme) => `I release the tension around ${theme}.`,
+        (theme) => `I receive the wisdom of ${theme}.`,
+        (theme) => `I let ${theme} be guided by calm.`,
+        (theme) => `I choose peace inside ${theme}.`,
+        (theme) => `${capitalizePhrase(theme)} is safe to unfold.`,
+        (theme) => `I make space for ${theme} to align.`,
+        (theme) => `I bring soft focus to ${theme}.`,
+        (theme) => `${capitalizePhrase(theme)} grows from presence.`,
+        (theme) => `I meet ${theme} without force.`
+      ];
+
+      function capitalizePhrase(phrase) {
+        return phrase.charAt(0).toUpperCase() + phrase.slice(1);
+      }
+
+      function buildMantras() {
+        const generated = [];
+        MANTRA_THEMES.forEach((theme) => {
+          MANTRA_PATTERNS.forEach((pattern) => {
+            generated.push(pattern(theme));
+          });
+        });
+
+        return FOUNDATIONAL_MANTRAS.concat(generated).slice(0, 365);
+      }
+
+      const MANTRAS = buildMantras();
 
       const GREEN_TEA_URL = "https://ko-fi.com/analysethat";
       const GARDEN_KEY = "manifestationGarden.v1";
@@ -1532,9 +1593,32 @@
 
       function fitMantra() {
         els.mantra.classList.remove("compact");
-        const textBox = els.mantra.getBoundingClientRect();
+        els.line.style.removeProperty("--mantra-font-size");
+
         const focusBox = document.querySelector(".focus").getBoundingClientRect();
-        if (textBox.bottom > focusBox.top - 24) {
+        const baseSize = parseFloat(getComputedStyle(els.line).fontSize);
+        const minSize = mobileControls.matches ? 28 : 54;
+        const verticalGap = mobileControls.matches ? 18 : 24;
+        let size = baseSize;
+
+        for (let step = 0; step < 18; step += 1) {
+          const textBox = els.mantra.getBoundingClientRect();
+          const overflowsLine = els.line.scrollWidth > els.mantra.clientWidth + 1;
+          const crowdsFocus = textBox.bottom > focusBox.top - verticalGap;
+
+          if (!overflowsLine && !crowdsFocus) {
+            break;
+          }
+
+          size = Math.max(minSize, size * 0.92);
+          els.line.style.setProperty("--mantra-font-size", `${size}px`);
+
+          if (size <= minSize) {
+            break;
+          }
+        }
+
+        if (size < baseSize * 0.94) {
           els.mantra.classList.add("compact");
         }
       }
