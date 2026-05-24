@@ -60,11 +60,11 @@ These images are captured from real app states and then presented as product ass
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/control-gratitude-support.png" alt="Gratitude panel with new seed, plant thanks, GitHub, and Green Tea controls" width="100%">
+      <img src="docs/control-gratitude-support.png" alt="Gratitude panel with thank-you text, GitHub, and Green Tea controls" width="100%">
       <br>
       <strong>Gratitude and support</strong>
       <br>
-      Plant a gratitude seed, visit the GitHub repo, or prepare the Green Tea support link once a donation URL exists.
+      Read a simple thank-you note, visit the GitHub repo, or buy a Green Tea through Ko-fi.
     </td>
     <td width="50%" valign="top">
       <img src="docs/control-garden-reset.png" alt="Garden reset confirmation with flower icon and bee interaction" width="100%">
@@ -121,14 +121,13 @@ http://127.0.0.1:4178/index.html
 
 ## Green Tea Support
 
-The Green Tea button is already designed into the experience, but it is intentionally disabled until a support URL exists.
+The Green Tea button inside the Gratitude panel is wired to:
 
-To activate it:
+```text
+https://ko-fi.com/analysethat
+```
 
-1. Create a support link with Ko-fi, Buy Me a Coffee, GitHub Sponsors, Stripe Payment Links, PayPal, or similar.
-2. Copy the public support URL.
-3. Put that URL into `GREEN_TEA_URL` in `index.html`.
-4. Publish the updated page.
+The public app keeps the language in-theme while Ko-fi handles the support flow.
 
 ## Note
 

@@ -673,22 +673,22 @@
       display: grid;
     }
 
+    .gratitude-copy {
+      display: grid;
+      gap: 0.48rem;
+      margin: 0 0 0.78rem;
+    }
+
     .gratitude-line {
-      margin: 0 0 0.7rem;
+      margin: 0;
       color: rgba(255, 247, 221, 0.82);
       font-size: 0.84rem;
       line-height: 1.35;
     }
 
-    .soft-actions,
     .link-stack {
       display: grid;
       gap: 0.42rem;
-    }
-
-    .soft-actions {
-      grid-template-columns: 1fr 1fr;
-      margin-bottom: 0.64rem;
     }
 
     .soft-command,
@@ -1236,14 +1236,14 @@
       </div>
 
       <div class="chakra-body" id="gratitudeBody">
-        <p class="gratitude-line" id="gratitudeLine">Thank you for the guidance already here.</p>
-        <div class="soft-actions">
-          <button class="soft-command" id="gratitudeNext" type="button"><svg class="symbol-icon" aria-hidden="true"><use href="#icon-seed"></use></svg><span>New seed</span></button>
-          <button class="soft-command" id="gratitudePlant" type="button"><svg class="symbol-icon" aria-hidden="true"><use href="#icon-lotus"></use></svg><span>Plant thanks</span></button>
+        <div class="gratitude-copy">
+          <p class="gratitude-line">Thank you for using this app. I hope it brings you calm.</p>
+          <p class="gratitude-line">If you want to support Vibe Coding this project, you can find it on GitHub.</p>
+          <p class="gratitude-line">If you want to buy me a Green Tea, Ko-fi is open.</p>
         </div>
         <div class="link-stack">
           <a class="support-link" href="https://github.com/analysethatltd-hub/manifestation-meditation-page" target="_blank" rel="noopener noreferrer"><span><svg class="symbol-icon" aria-hidden="true"><use href="#icon-branch"></use></svg> GitHub</span><span aria-hidden="true">repo</span></a>
-          <a class="support-link" id="greenTeaLink" href="#" aria-disabled="true"><span><svg class="symbol-icon" aria-hidden="true"><use href="#icon-tea"></use></svg> Green Tea</span><span aria-hidden="true">soon</span></a>
+          <a class="support-link" id="greenTeaLink" href="#" target="_blank" rel="noopener noreferrer"><span><svg class="symbol-icon" aria-hidden="true"><use href="#icon-tea"></use></svg> Green Tea</span><span aria-hidden="true">Ko-fi</span></a>
         </div>
       </div>
     </aside>
@@ -1353,9 +1353,6 @@
         gratitudePanel: document.getElementById("gratitudePanel"),
         gratitudeBody: document.getElementById("gratitudeBody"),
         gratitudeToggle: document.getElementById("gratitudeToggle"),
-        gratitudeLine: document.getElementById("gratitudeLine"),
-        gratitudeNext: document.getElementById("gratitudeNext"),
-        gratitudePlant: document.getElementById("gratitudePlant"),
         greenTeaLink: document.getElementById("greenTeaLink"),
         breathPanel: document.getElementById("breathPanel"),
         breathBody: document.getElementById("breathBody"),
@@ -1431,16 +1428,7 @@
         "The blessing is not separate from my healing."
       ];
 
-      const GRATITUDE_LINES = [
-        "Thank you for the guidance already here.",
-        "Thank you for the door opening gently.",
-        "Thank you for the desire becoming devotion.",
-        "Thank you for what is healing in silence.",
-        "Thank you for the blessing I can carry well.",
-        "Thank you for the next right breath.",
-        "Thank you for the garden growing while I become ready."
-      ];
-      const GREEN_TEA_URL = "";
+      const GREEN_TEA_URL = "https://ko-fi.com/analysethat";
       const GARDEN_KEY = "manifestationGarden.v1";
       const GARDEN_LIMIT = 420;
       const PLANT_INTERVAL_MS = 72000;
@@ -1482,7 +1470,6 @@
         mediaFrequency: 0,
         isMobileAudio: forceTouchAudio || mobileUserAgent || touchConstrainedAudio,
         lastAudioGesture: "none",
-        gratitudeIndex: 0,
         panelCollapsed: mobileControls.matches,
         panelUserSet: false,
         panelGesture: null,
@@ -1631,11 +1618,6 @@
         state.activeBreath = -1;
         state.breathStart = performance.now();
         syncBreathControls();
-      }
-
-      function setGratitude(index) {
-        state.gratitudeIndex = (index + GRATITUDE_LINES.length) % GRATITUDE_LINES.length;
-        els.gratitudeLine.textContent = GRATITUDE_LINES[state.gratitudeIndex];
       }
 
       function buildChakraButtons() {
@@ -1866,15 +1848,6 @@
           if (event.key === "Escape" && !els.gardenResetConfirm.hidden) {
             closeGardenResetConfirm();
           }
-        });
-
-        els.gratitudeNext.addEventListener("click", () => {
-          setGratitude(state.gratitudeIndex + 1);
-        });
-
-        els.gratitudePlant.addEventListener("click", () => {
-          setGratitude(state.gratitudeIndex + 1);
-          plantGratitude();
         });
 
         els.greenTeaLink.addEventListener("click", (event) => {
@@ -2158,24 +2131,6 @@
       function confirmResetGarden() {
         els.gardenResetConfirm.hidden = true;
         resetGarden();
-      }
-
-      function plantGratitude() {
-        if (state.width === 0 || state.height === 0) {
-          return;
-        }
-
-        const now = Date.now();
-        for (let index = 0; index < 5; index += 1) {
-          const point = randomGardenPoint();
-          const plant = gardenPointToPlant(point, "flower", now - 7 * 60 * 1000 * Math.random());
-          state.garden.plants.push(plant);
-        }
-        if (state.garden.plants.length > GARDEN_LIMIT) {
-          state.garden.plants = state.garden.plants.slice(-GARDEN_LIMIT);
-        }
-        state.garden.bee.pollen = 1;
-        saveGarden();
       }
 
       function chooseBeeTarget() {
@@ -3386,13 +3341,11 @@
       if (GREEN_TEA_URL) {
         els.greenTeaLink.href = GREEN_TEA_URL;
         els.greenTeaLink.removeAttribute("aria-disabled");
-        els.greenTeaLink.querySelector("span").textContent = "tip";
       }
       setChakra(0);
       setVolume(52);
       syncAudioToggle();
       syncBreathControls();
-      setGratitude(0);
       resize();
       if (shouldPrimeMediaAudio()) {
         const idle = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 250));
