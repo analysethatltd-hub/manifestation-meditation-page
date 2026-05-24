@@ -1,44 +1,102 @@
 # Manifestation Meditation Page
 
-A single-page meditation space for breath work, desire, gratitude, sound, colour, sacred geometry, and one very busy little bee.
+**A living meditation web experience for breath, sound, gratitude, and focused intention.**
 
-[Open the live page](https://analysethatltd-hub.github.io/manifestation-meditation-page/)
+[Open the live experience](https://analysethatltd-hub.github.io/manifestation-meditation-page/)
 
-![Mobile meditation view](docs/screenshot-mobile.png)
+<p align="center">
+  <img src="docs/product-shot-mobile.png" alt="Manifestation Meditation Page shown as a mobile product shot beside green tea" width="760">
+</p>
 
-## What It Does
+## A Quiet Product For Inner Focus
 
-This is a static GitHub Pages site built as a quiet focus object rather than a conventional app. The page keeps the mantra and breath circle at the centre, while the controls collapse into small glassy panels so the screen stays calm.
+Manifestation Meditation Page is a single-screen ritual space designed to help the user settle, breathe, listen, and return attention to one clear inner signal.
 
-![Desktop meditation view](docs/screenshot-desktop.png)
+It is intentionally not a dashboard, not a course, and not a content feed. The product is the moment itself: a large mantra, a centered breath guide, a living garden, soft sacred geometry, and a frequency layer that starts only when the user taps for sound.
 
-## Features
+## Product Highlights
 
-- Rotating manifestation mantras centred around identity, desire, surrender, alignment, and receiving well.
-- A fixed breath-work circle that guides inhale, hold, release, and rest.
-- Breath controls on the right panel for adjusting each phase length without changing the default rhythm.
-- Chakra frequency controls with manual tuning, volume, and automatic upward progression.
-- A top-right sound button so mobile Safari and Chrome receive a clear user gesture before Web Audio starts.
-- Living sacred-geometry background with slow colour shifts and chakra-responsive glow.
-- A gratitude panel with rotating gratitude seeds, a flower-planting action, a GitHub link, and a themed Green Tea support slot.
-- A tiny bee that scouts, darts, pollinates flowers, leaves pollen trails, and gets startled away if you try to tap it.
-- Soft symbolic iconography for gratitude, seeds, breath waves, sound, root energy, tea, and source links.
-- Local garden persistence, so flowers and trees gradually build up across sessions.
+- **Mantras as the centrepiece**  
+  Large rotating phrases keep the experience emotionally direct and visually calm.
 
-## Green Tea Support Setup
+- **Guided breathwork**  
+  A fixed central breath circle guides inhale, hold, release, and rest without pulling the eye away from the focal point.
 
-The Green Tea button is already in the page, but it is intentionally disabled until a donation URL exists.
+- **Desktop-quality sound on mobile**  
+  The app uses browser-generated Web Audio for the frequency bed, ambient air, subharmonics, compression, and space. Mobile browsers require a tap, so the sound button is part of the designed ritual.
 
-To activate it:
+- **Chakra-inspired frequency tuning**  
+  Root through Crown controls can auto-ascend or be manually tuned, with a deliberately capped volume range for calmer listening.
 
-1. Create a payment/support link with a service such as Ko-fi, Buy Me a Coffee, GitHub Sponsors, Stripe Payment Links, or PayPal.
-2. Copy the public donation URL.
-3. Put that URL into `GREEN_TEA_URL` near the top of the script in `index.html`.
-4. Commit and push to `main`, and GitHub Pages will publish the button.
+- **A living garden**  
+  The bee scouts, darts, pollinates, plants flowers and trees, and slowly builds a garden that persists locally over time.
+
+- **Playful interaction**  
+  Tap near the bee and it reacts, darts away, and visibly agitates before returning to its pollinating work.
+
+- **Gratitude and support controls**  
+  Collapsible side panels keep gratitude, breath timing, GitHub, and Green Tea support available without cluttering the meditation view.
+
+## Control Feature Close-ups
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <img src="docs/control-chakra-tuning.png" alt="Chakra frequency tuning panel with colour controls, auto ascend, frequency, and volume" width="100%">
+      <br>
+      <strong>Frequency tuning</strong>
+      <br>
+      Choose a chakra colour, let the sequence auto-ascend, or manually tune the frequency and capped volume for a softer sound bed.
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/control-breath-gratitude.png" alt="Breath and gratitude controls shown on a mobile meditation interface" width="100%">
+      <br>
+      <strong>Breath and gratitude</strong>
+      <br>
+      Adjust inhale, hold, release, and rest timing while keeping gratitude present as a light ritual, not another task list.
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/control-garden-reset.png" alt="Garden reset confirmation with flower icon and bee interaction" width="100%">
+      <br>
+      <strong>Living garden controls</strong>
+      <br>
+      Reset the garden intentionally, keep the bee planting, and let the visual space become more personal the longer it is used.
+    </td>
+  </tr>
+</table>
+
+## The Experience
+
+<p align="center">
+  <img src="docs/screenshot-mobile.png" alt="Mobile meditation interface with mantra, breath circle, flowers, bee, and controls" width="360">
+</p>
+
+<p align="center">
+  <img src="docs/screenshot-desktop.png" alt="Desktop meditation interface with sacred geometry, garden, and chakra tuning controls" width="760">
+</p>
+
+## Mobile Sound
+
+Mobile Safari and Chrome block audio until the visitor performs a clear user gesture. Use the top-right sound button or the `Tap for sound` prompt after the page loads.
+
+If a phone has cached an older build, open the live page with a cache-busting URL:
+
+```text
+https://analysethatltd-hub.github.io/manifestation-meditation-page/?v=mobile-audio-bridge
+```
+
+## Built With
+
+- Single static `index.html`
+- CSS, Canvas, and browser Web Audio
+- No build step
+- No tracking
+- No account system
+- Local browser storage for garden persistence
 
 ## Local Preview
 
-This repo is just static HTML, CSS, canvas, and Web Audio. You can run it locally with any small static server:
+Run any small static server from the project folder:
 
 ```powershell
 python -m http.server 4178
@@ -50,6 +108,17 @@ Then open:
 http://127.0.0.1:4178/index.html
 ```
 
-## Notes
+## Green Tea Support
 
-The frequency and chakra mappings are creative, experiential defaults rather than medical or spiritual claims. Browsers, especially on mobile, block audio until the visitor taps a control, so the top-right sound button is part of the intended experience.
+The Green Tea button is already designed into the experience, but it is intentionally disabled until a support URL exists.
+
+To activate it:
+
+1. Create a support link with Ko-fi, Buy Me a Coffee, GitHub Sponsors, Stripe Payment Links, PayPal, or similar.
+2. Copy the public support URL.
+3. Put that URL into `GREEN_TEA_URL` in `index.html`.
+4. Publish the updated page.
+
+## Note
+
+The frequency and chakra mappings are creative, experiential defaults rather than medical or spiritual claims. The product is designed as a contemplative focus object.
