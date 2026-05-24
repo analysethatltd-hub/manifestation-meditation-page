@@ -404,53 +404,10 @@
       outline-offset: 2px;
     }
 
-    .speaker-icon {
-      position: relative;
-      inline-size: 1rem;
-      block-size: 1rem;
-    }
-
-    .speaker-icon::before {
-      content: "";
-      position: absolute;
-      left: 0.04rem;
-      top: 0.28rem;
-      inline-size: 0.34rem;
-      block-size: 0.44rem;
-      border-radius: 2px;
-      background: currentColor;
-    }
-
-    .speaker-icon::after {
-      content: "";
-      position: absolute;
-      left: 0.25rem;
-      top: 0.14rem;
-      border-top: 0.36rem solid transparent;
-      border-bottom: 0.36rem solid transparent;
-      border-right: 0.54rem solid currentColor;
-    }
-
     .audio-toggle[data-audio="on"] {
       color: rgba(184, 255, 212, 0.95);
       border-color: rgba(184, 255, 212, 0.34);
       box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.22), 0 0 1.4rem rgba(104, 255, 178, 0.22);
-    }
-
-    .audio-toggle[data-audio="off"] .speaker-icon {
-      opacity: 0.58;
-    }
-
-    .audio-toggle[data-audio="off"] .speaker-icon span {
-      position: absolute;
-      left: 0.12rem;
-      top: 0.47rem;
-      inline-size: 1rem;
-      block-size: 2px;
-      border-radius: 999px;
-      background: currentColor;
-      transform: rotate(-42deg);
-      transform-origin: center;
     }
 
     .icon-sprite {
@@ -1133,23 +1090,10 @@
       <symbol id="icon-heart" viewBox="0 0 24 24">
         <path d="M12 20s-7-4.4-8.7-9.2C2 7.1 4.4 4.5 7.2 4.5c1.7 0 3.1 1 4.8 2.9 1.7-1.9 3.1-2.9 4.8-2.9 2.8 0 5.2 2.6 3.9 6.3C19 15.6 12 20 12 20Z"></path>
       </symbol>
-      <symbol id="icon-seed" viewBox="0 0 24 24">
-        <path d="M12 21V11"></path>
-        <path d="M12 12c-4.2-.4-6.4-2.5-6.7-6.2 4.1.2 6.1 2.4 6.7 6.2Z"></path>
-        <path d="M12 14c4.2-.3 6.4-2.4 6.8-6.1-4.1.1-6.2 2.3-6.8 6.1Z"></path>
-      </symbol>
       <symbol id="icon-breath" viewBox="0 0 24 24">
         <path d="M3 8c3 0 3-2 6-2s3 2 6 2 3-2 6-2"></path>
         <path d="M3 13c3 0 3-2 6-2s3 2 6 2 3-2 6-2"></path>
         <path d="M3 18c3 0 3-2 6-2s3 2 6 2 3-2 6-2"></path>
-      </symbol>
-      <symbol id="icon-sliders" viewBox="0 0 24 24">
-        <path d="M4 7h7"></path>
-        <path d="M15 7h5"></path>
-        <circle cx="13" cy="7" r="2"></circle>
-        <path d="M4 17h4"></path>
-        <path d="M12 17h8"></path>
-        <circle cx="10" cy="17" r="2"></circle>
       </symbol>
       <symbol id="icon-sound" viewBox="0 0 24 24">
         <path d="M5 10v4h4l5 4V6l-5 4H5Z"></path>
@@ -1161,11 +1105,6 @@
         <path d="M12 12v8"></path>
         <path d="M12 18c-2 0-3.3 1-4.6 2"></path>
         <path d="M12 18c2 0 3.3 1 4.6 2"></path>
-      </symbol>
-      <symbol id="icon-lotus" viewBox="0 0 24 24">
-        <path d="M12 20c-4.8-2.8-6.8-6-6.2-10 3.6 1 5.6 4 6.2 10Z"></path>
-        <path d="M12 20c4.8-2.8 6.8-6 6.2-10-3.6 1-5.6 4-6.2 10Z"></path>
-        <path d="M12 20c-1.8-4.2-1.8-8 0-11.5 1.8 3.5 1.8 7.3 0 11.5Z"></path>
       </symbol>
       <symbol id="icon-branch" viewBox="0 0 24 24">
         <circle cx="6" cy="6" r="2"></circle>
@@ -1540,6 +1479,8 @@
         },
         garden: {
           plants: [],
+          sortedPlants: [],
+          plantsDirty: true,
           hasSavedGarden: false,
           lastTick: performance.now(),
           lastSave: 0,
@@ -2135,11 +2076,29 @@
         return "flower";
       }
 
+      function markGardenDirty() {
+        state.garden.plantsDirty = true;
+      }
+
+      function sortedGardenPlants() {
+        if (state.garden.plantsDirty) {
+          state.garden.sortedPlants = state.garden.plants.slice().sort((a, b) => a.ny - b.ny);
+          state.garden.plantsDirty = false;
+        }
+
+        return state.garden.sortedPlants;
+      }
+
       function saveGarden() {
         try {
-          const plants = state.garden.plants.slice(-GARDEN_LIMIT);
+          const plants = state.garden.plants.length > GARDEN_LIMIT
+            ? state.garden.plants.slice(-GARDEN_LIMIT)
+            : state.garden.plants;
           window.localStorage.setItem(GARDEN_KEY, JSON.stringify({ plants }));
-          state.garden.plants = plants;
+          if (plants !== state.garden.plants) {
+            state.garden.plants = plants;
+            markGardenDirty();
+          }
           state.garden.hasSavedGarden = true;
           state.garden.lastSave = performance.now();
         } catch (error) {
@@ -2156,9 +2115,11 @@
               .filter((plant) => Number.isFinite(plant.nx) && Number.isFinite(plant.ny) && plant.plantedAt)
               .slice(-GARDEN_LIMIT);
             state.garden.plantCount = state.garden.plants.length;
+            markGardenDirty();
           }
         } catch (error) {
           state.garden.plants = [];
+          markGardenDirty();
         }
       }
 
@@ -2178,12 +2139,14 @@
           state.garden.plants.push(gardenPointToPlant(point, kind, now - age));
         }
         state.garden.plantCount = state.garden.plants.length;
+        markGardenDirty();
         saveGarden();
       }
 
       function resetGarden() {
         const now = performance.now();
         state.garden.plants = [];
+        markGardenDirty();
         state.garden.plantCount = 0;
         state.garden.hasSavedGarden = true;
         state.garden.resetRippleUntil = now + 1450;
@@ -2322,6 +2285,7 @@
         if (state.garden.plants.length > GARDEN_LIMIT) {
           state.garden.plants = state.garden.plants.slice(-GARDEN_LIMIT);
         }
+        markGardenDirty();
         bee.pollen = 1;
         bee.nextPlantAt = now + PLANT_INTERVAL_MS * (0.48 + Math.random() * 0.42);
         saveGarden();
@@ -2581,9 +2545,10 @@
           gardenCtx.restore();
         }
 
-        const plants = state.garden.plants.slice().sort((a, b) => a.ny - b.ny);
+        const plants = sortedGardenPlants();
+        const nowMs = Date.now();
         plants.forEach((plant) => {
-          const age = Math.max(0, Date.now() - plant.plantedAt);
+          const age = Math.max(0, nowMs - plant.plantedAt);
           const maturity = smoothStep(age / plant.matureMs);
           const x = plant.nx * state.width;
           const y = plant.ny * state.height;
