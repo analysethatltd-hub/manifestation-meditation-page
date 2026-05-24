@@ -39,28 +39,39 @@ It is intentionally not a dashboard, not a course, and not a content feed. The p
 
 ## Control Feature Close-ups
 
+These images are captured from real app states and then presented as product assets. The controls shown here are the actual controls in `index.html`.
+
 <table>
   <tr>
-    <td width="33%" valign="top">
+    <td width="50%" valign="top">
       <img src="docs/control-chakra-tuning.png" alt="Chakra frequency tuning panel with colour controls, auto ascend, frequency, and volume" width="100%">
       <br>
       <strong>Frequency tuning</strong>
       <br>
       Choose a chakra colour, let the sequence auto-ascend, or manually tune the frequency and capped volume for a softer sound bed.
     </td>
-    <td width="33%" valign="top">
-      <img src="docs/control-breath-gratitude.png" alt="Breath and gratitude controls shown on a mobile meditation interface" width="100%">
+    <td width="50%" valign="top">
+      <img src="docs/control-breath-timing.png" alt="Breath timing panel with inhale, hold, release, rest, and reset controls" width="100%">
       <br>
-      <strong>Breath and gratitude</strong>
+      <strong>Breath timing</strong>
       <br>
-      Adjust inhale, hold, release, and rest timing while keeping gratitude present as a light ritual, not another task list.
+      Adjust inhale, hold, release, and rest while keeping the breathing circle fixed as the main visual anchor.
     </td>
-    <td width="33%" valign="top">
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/control-gratitude-support.png" alt="Gratitude panel with new seed, plant thanks, GitHub, and Green Tea controls" width="100%">
+      <br>
+      <strong>Gratitude and support</strong>
+      <br>
+      Plant a gratitude seed, visit the GitHub repo, or prepare the Green Tea support link once a donation URL exists.
+    </td>
+    <td width="50%" valign="top">
       <img src="docs/control-garden-reset.png" alt="Garden reset confirmation with flower icon and bee interaction" width="100%">
       <br>
-      <strong>Living garden controls</strong>
+      <strong>Garden reset</strong>
       <br>
-      Reset the garden intentionally, keep the bee planting, and let the visual space become more personal the longer it is used.
+      Clear flowers and trees intentionally with confirmation, then let the bee begin planting again.
     </td>
   </tr>
 </table>
